@@ -12,17 +12,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { aiConversations, aiMessages, aiSettings } from "@/db/schema";
 import { eq, desc, and, count } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 // GET /api/ai/conversations - List user's conversations
 export async function GET(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session?.user?.id) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser?.id) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const userId = session.user.id;
+    const userId = authUser.id;
     const { searchParams } = new URL(request.url);
     
     // Pagination
@@ -111,12 +111,12 @@ export async function GET(request: NextRequest) {
 // POST /api/ai/conversations - Create a new conversation
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session?.user?.id) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser?.id) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const userId = session.user.id;
+    const userId = authUser.id;
     const body = await request.json();
 
     // Check if AI is enabled for user

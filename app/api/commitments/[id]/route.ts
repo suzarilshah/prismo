@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { commitments, commitmentPayments, transactions } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { z } from "zod";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 // GET /api/commitments/[id] - Get a single commitment with payment history
 export async function GET(
@@ -11,8 +11,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -21,7 +21,7 @@ export async function GET(
     const [commitment] = await db
       .select()
       .from(commitments)
-      .where(and(eq(commitments.id, id), eq(commitments.userId, session.user.id)));
+      .where(and(eq(commitments.id, id), eq(commitments.userId, authUser.id)));
 
     if (!commitment) {
       return NextResponse.json({ error: "Commitment not found" }, { status: 404 });
@@ -56,8 +56,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -68,7 +68,7 @@ export async function PATCH(
     const [existing] = await db
       .select()
       .from(commitments)
-      .where(and(eq(commitments.id, id), eq(commitments.userId, session.user.id)));
+      .where(and(eq(commitments.id, id), eq(commitments.userId, authUser.id)));
 
     if (!existing) {
       return NextResponse.json({ error: "Commitment not found" }, { status: 404 });
@@ -102,8 +102,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -113,7 +113,7 @@ export async function DELETE(
     const [existing] = await db
       .select()
       .from(commitments)
-      .where(and(eq(commitments.id, id), eq(commitments.userId, session.user.id)));
+      .where(and(eq(commitments.id, id), eq(commitments.userId, authUser.id)));
 
     if (!existing) {
       return NextResponse.json({ error: "Commitment not found" }, { status: 404 });

@@ -2,17 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { commitments, commitmentPayments, categories } from "@/db/schema";
 import { eq, and, isNotNull, desc, sql } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 // GET /api/commitments/archived - Get all archived/terminated commitments
 export async function GET(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const userId = session.user.id;
+    const userId = authUser.id;
 
     // Get all terminated commitments
     const archivedCommitments = await db
@@ -91,8 +91,8 @@ export async function GET(request: NextRequest) {
 // POST /api/commitments/archived - Restore a terminated commitment
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
       .where(
         and(
           eq(commitments.id, commitmentId),
-          eq(commitments.userId, session.user.id)
+          eq(commitments.userId, authUser.id)
         )
       );
 

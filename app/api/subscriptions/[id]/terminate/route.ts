@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { subscriptions } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 // POST /api/subscriptions/[id]/terminate - Terminate a subscription
 export async function POST(
@@ -10,8 +10,8 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -23,7 +23,7 @@ export async function POST(
     const subscription = await db.query.subscriptions.findFirst({
       where: and(
         eq(subscriptions.id, id),
-        eq(subscriptions.userId, session.user.id)
+        eq(subscriptions.userId, authUser.id)
       ),
     });
 

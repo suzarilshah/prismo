@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { financeGroups, financeGroupMembers, financeGroupInvites, users } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 import { z } from "zod";
 import { randomBytes } from "crypto";
 import { sendEmail, emailTemplates } from "@/lib/email";
@@ -37,8 +37,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -51,7 +51,7 @@ export async function GET(
       .where(
         and(
           eq(financeGroupMembers.financeGroupId, financeGroupId),
-          eq(financeGroupMembers.userId, session.user.id)
+          eq(financeGroupMembers.userId, authUser.id)
         )
       );
 
@@ -91,8 +91,8 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -107,7 +107,7 @@ export async function POST(
       .where(
         and(
           eq(financeGroupMembers.financeGroupId, financeGroupId),
-          eq(financeGroupMembers.userId, session.user.id)
+          eq(financeGroupMembers.userId, authUser.id)
         )
       );
 
@@ -171,7 +171,7 @@ export async function POST(
       .insert(financeGroupInvites)
       .values({
         financeGroupId,
-        invitedByUserId: session.user.id,
+        invitedByUserId: authUser.id,
         inviteeEmail: validatedData.inviteeEmail,
         inviteeName: validatedData.inviteeName,
         proposedRole: validatedData.proposedRole,
@@ -206,7 +206,7 @@ export async function POST(
     const [inviter] = await db
       .select({ name: users.name })
       .from(users)
-      .where(eq(users.id, session.user.id));
+      .where(eq(users.id, authUser.id));
     
     const [group] = await db
       .select({ name: financeGroups.name })

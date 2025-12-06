@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { monthlyPcbRecords } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 import { z } from "zod";
 
 const updateSchema = z.object({
@@ -29,8 +29,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -42,7 +42,7 @@ export async function GET(
       .where(
         and(
           eq(monthlyPcbRecords.id, id),
-          eq(monthlyPcbRecords.userId, session.user.id)
+          eq(monthlyPcbRecords.userId, authUser.id)
         )
       );
 
@@ -69,8 +69,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -85,7 +85,7 @@ export async function PATCH(
       .where(
         and(
           eq(monthlyPcbRecords.id, id),
-          eq(monthlyPcbRecords.userId, session.user.id)
+          eq(monthlyPcbRecords.userId, authUser.id)
         )
       );
 
@@ -127,8 +127,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -141,7 +141,7 @@ export async function DELETE(
       .where(
         and(
           eq(monthlyPcbRecords.id, id),
-          eq(monthlyPcbRecords.userId, session.user.id)
+          eq(monthlyPcbRecords.userId, authUser.id)
         )
       );
 

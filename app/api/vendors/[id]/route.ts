@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { vendors, categories } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { z } from "zod";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 import { notifyVendorRemoved } from "@/lib/notification-service";
 
 const updateVendorSchema = z.object({
@@ -26,8 +26,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -40,7 +40,7 @@ export async function GET(
       })
       .from(vendors)
       .leftJoin(categories, eq(vendors.categoryId, categories.id))
-      .where(and(eq(vendors.id, id), eq(vendors.userId, session.user.id)))
+      .where(and(eq(vendors.id, id), eq(vendors.userId, authUser.id)))
       .limit(1);
 
     if (results.length === 0) {
@@ -69,8 +69,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -87,7 +87,7 @@ export async function PATCH(
     const [updatedVendor] = await db
       .update(vendors)
       .set(updateData)
-      .where(and(eq(vendors.id, id), eq(vendors.userId, session.user.id)))
+      .where(and(eq(vendors.id, id), eq(vendors.userId, authUser.id)))
       .returning();
 
     if (!updatedVendor) {
@@ -119,8 +119,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -128,7 +128,7 @@ export async function DELETE(
 
     const [deletedVendor] = await db
       .delete(vendors)
-      .where(and(eq(vendors.id, id), eq(vendors.userId, session.user.id)))
+      .where(and(eq(vendors.id, id), eq(vendors.userId, authUser.id)))
       .returning();
 
     if (!deletedVendor) {
@@ -136,7 +136,7 @@ export async function DELETE(
     }
 
     // Create notification for vendor removal
-    await notifyVendorRemoved(session.user.id, deletedVendor.name);
+    await notifyVendorRemoved(authUser.id, deletedVendor.name);
 
     return NextResponse.json({
       success: true,

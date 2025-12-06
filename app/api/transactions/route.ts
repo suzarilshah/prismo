@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { transactions, categories } from "@/db/schema";
 import { eq, and, desc, gte, lte } from "drizzle-orm";
 import { z } from "zod";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 import { notifyIncomeAdded, notifyExpenseAdded } from "@/lib/notification-service";
 
 const transactionSchema = z.object({
@@ -30,11 +30,11 @@ const transactionSchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     // Get authenticated user
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
-    const userId = session.user.id;
+    const userId = authUser.id;
 
     const { searchParams } = new URL(request.url);
     const startDate = searchParams.get("startDate");
@@ -93,8 +93,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Get authenticated user
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
     const [newTransaction] = await db
       .insert(transactions)
       .values({
-        userId: session.user.id,
+        userId: authUser.id,
         categoryId: categoryId,
         amount: validatedData.amount.toString(),
         currency: validatedData.currency,
@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
     // Create notification for transaction
     if (validatedData.type === "income") {
       await notifyIncomeAdded(
-        session.user.id,
+        authUser.id,
         parseFloat(validatedData.amount.toString()),
         validatedData.currency,
         validatedData.description
@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
         categoryName = cat?.name;
       }
       await notifyExpenseAdded(
-        session.user.id,
+        authUser.id,
         parseFloat(validatedData.amount.toString()),
         validatedData.currency,
         validatedData.description,

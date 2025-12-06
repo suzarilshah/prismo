@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { subscriptions, subscriptionPayments, transactions, categories } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 // GET /api/subscriptions/[id]/payments - Get payment history for a subscription
 export async function GET(
@@ -10,8 +10,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -21,7 +21,7 @@ export async function GET(
     const subscription = await db.query.subscriptions.findFirst({
       where: and(
         eq(subscriptions.id, id),
-        eq(subscriptions.userId, session.user.id)
+        eq(subscriptions.userId, authUser.id)
       ),
     });
 
@@ -54,8 +54,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -67,7 +67,7 @@ export async function PATCH(
     const subscription = await db.query.subscriptions.findFirst({
       where: and(
         eq(subscriptions.id, id),
-        eq(subscriptions.userId, session.user.id)
+        eq(subscriptions.userId, authUser.id)
       ),
     });
 
@@ -90,7 +90,7 @@ export async function PATCH(
     // Get or create "Subscriptions" category
     let subscriptionCategory = await db.query.categories.findFirst({
       where: and(
-        eq(categories.userId, session.user.id),
+        eq(categories.userId, authUser.id),
         eq(categories.name, "Subscriptions"),
         eq(categories.type, "expense")
       ),
@@ -100,7 +100,7 @@ export async function PATCH(
       const [newCategory] = await db
         .insert(categories)
         .values({
-          userId: session.user.id,
+          userId: authUser.id,
           name: "Subscriptions",
           color: "#8B5CF6", // Purple/violet
           icon: "📦",
@@ -117,7 +117,7 @@ export async function PATCH(
       const [newTransaction] = await db
         .insert(transactions)
         .values({
-          userId: session.user.id,
+          userId: authUser.id,
           categoryId: subscriptionCategory.id,
           amount: subscription.amount,
           currency: subscription.currency || "MYR",
@@ -151,7 +151,7 @@ export async function PATCH(
         .insert(subscriptionPayments)
         .values({
           subscriptionId: id,
-          userId: session.user.id,
+          userId: authUser.id,
           billingYear: year,
           billingMonth: month,
           expectedAmount: subscription.amount,

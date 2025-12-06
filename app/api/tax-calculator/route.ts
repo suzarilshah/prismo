@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { users, taxDeductions, taxYears, monthlyPcbRecords, transactions } from "@/db/schema";
 import { eq, and, sum, gte, lte } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 import { 
   LHDN_RELIEF_CATEGORIES, 
   MALAYSIA_TAX_BRACKETS, 
@@ -13,8 +13,8 @@ import {
 // GET /api/tax-calculator - Calculate tax for the current user
 export async function GET(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     const [user] = await db
       .select()
       .from(users)
-      .where(eq(users.id, session.user.id));
+      .where(eq(users.id, authUser.id));
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
       .from(transactions)
       .where(
         and(
-          eq(transactions.userId, session.user.id),
+          eq(transactions.userId, authUser.id),
           eq(transactions.type, "income"),
           gte(transactions.date, startOfYear),
           lte(transactions.date, endOfYear)
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
       .from(taxDeductions)
       .where(
         and(
-          eq(taxDeductions.userId, session.user.id),
+          eq(taxDeductions.userId, authUser.id),
           eq(taxDeductions.year, year)
         )
       );
@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
       .from(monthlyPcbRecords)
       .where(
         and(
-          eq(monthlyPcbRecords.userId, session.user.id),
+          eq(monthlyPcbRecords.userId, authUser.id),
           eq(monthlyPcbRecords.year, year)
         )
       );
@@ -207,8 +207,8 @@ export async function GET(request: NextRequest) {
 // POST /api/tax-calculator - Save or update tax year record
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -221,7 +221,7 @@ export async function POST(request: NextRequest) {
       .from(taxYears)
       .where(
         and(
-          eq(taxYears.userId, session.user.id),
+          eq(taxYears.userId, authUser.id),
           eq(taxYears.year, year)
         )
       );
@@ -247,7 +247,7 @@ export async function POST(request: NextRequest) {
       const [created] = await db
         .insert(taxYears)
         .values({
-          userId: session.user.id,
+          userId: authUser.id,
           year,
           ...taxData,
         })

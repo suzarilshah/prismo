@@ -2,16 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { commitments, commitmentPayments } from "@/db/schema";
 import { eq, and, desc, sql, gte, lte } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 // GET /api/commitments/analytics - Get commitment payment analytics
 export async function GET(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
-    const userId = session.user.id;
+    const userId = authUser.id;
 
     // Get all commitments
     const userCommitments = await db

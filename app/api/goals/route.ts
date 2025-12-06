@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { goals } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { z } from "zod";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 import { notifyGoalAdded } from "@/lib/notification-service";
 
 const goalSchema = z.object({
@@ -21,15 +21,15 @@ const goalSchema = z.object({
 // GET /api/goals - List all goals
 export async function GET(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
     const isCompleted = searchParams.get("isCompleted");
 
-    const conditions = [eq(goals.userId, session.user.id)];
+    const conditions = [eq(goals.userId, authUser.id)];
 
     if (isCompleted !== null && isCompleted !== undefined) {
       conditions.push(eq(goals.isCompleted, isCompleted === "true"));
@@ -69,8 +69,8 @@ export async function GET(request: NextRequest) {
 // POST /api/goals - Create a new goal
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
     const [newGoal] = await db
       .insert(goals)
       .values({
-        userId: session.user.id,
+        userId: authUser.id,
         name: validatedData.name,
         description: validatedData.description,
         targetAmount: validatedData.targetAmount.toString(),
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
 
     // Create notification for new goal
     await notifyGoalAdded(
-      session.user.id,
+      authUser.id,
       validatedData.name,
       parseFloat(validatedData.targetAmount.toString()),
       validatedData.currency,

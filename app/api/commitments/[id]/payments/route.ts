@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { commitments, commitmentPayments, transactions } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { z } from "zod";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 const paymentUpdateSchema = z.object({
   status: z.enum(["pending", "paid", "overdue", "skipped", "partial"]).optional(),
@@ -22,8 +22,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -33,7 +33,7 @@ export async function GET(
     const [commitment] = await db
       .select()
       .from(commitments)
-      .where(and(eq(commitments.id, id), eq(commitments.userId, session.user.id)));
+      .where(and(eq(commitments.id, id), eq(commitments.userId, authUser.id)));
 
     if (!commitment) {
       return NextResponse.json({ error: "Commitment not found" }, { status: 404 });
@@ -81,8 +81,8 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -98,7 +98,7 @@ export async function POST(
     const [commitment] = await db
       .select()
       .from(commitments)
-      .where(and(eq(commitments.id, id), eq(commitments.userId, session.user.id)));
+      .where(and(eq(commitments.id, id), eq(commitments.userId, authUser.id)));
 
     if (!commitment) {
       return NextResponse.json({ error: "Commitment not found" }, { status: 404 });
@@ -127,7 +127,7 @@ export async function POST(
       .insert(commitmentPayments)
       .values({
         commitmentId: id,
-        userId: session.user.id,
+        userId: authUser.id,
         year,
         month,
         dueDate,
@@ -155,8 +155,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -170,7 +170,7 @@ export async function PATCH(
     const [commitment] = await db
       .select()
       .from(commitments)
-      .where(and(eq(commitments.id, id), eq(commitments.userId, session.user.id)));
+      .where(and(eq(commitments.id, id), eq(commitments.userId, authUser.id)));
 
     if (!commitment) {
       return NextResponse.json({ error: "Commitment not found" }, { status: 404 });
@@ -203,7 +203,7 @@ export async function PATCH(
           .insert(commitmentPayments)
           .values({
             commitmentId: id,
-            userId: session.user.id,
+            userId: authUser.id,
             year,
             month,
             dueDate,
@@ -238,7 +238,7 @@ export async function PATCH(
       const [newTransaction] = await db
         .insert(transactions)
         .values({
-          userId: session.user.id,
+          userId: authUser.id,
           categoryId: commitment.categoryId,
           amount: updateValues.paidAmount || commitment.amount,
           currency: commitment.currency || "MYR",

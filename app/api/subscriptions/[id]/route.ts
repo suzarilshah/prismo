@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { subscriptions, categories } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { z } from "zod";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 const updateSubscriptionSchema = z.object({
   categoryId: z.string().uuid().optional().nullable().or(z.literal("")),
@@ -27,8 +27,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -41,7 +41,7 @@ export async function GET(
       })
       .from(subscriptions)
       .leftJoin(categories, eq(subscriptions.categoryId, categories.id))
-      .where(and(eq(subscriptions.id, id), eq(subscriptions.userId, session.user.id)))
+      .where(and(eq(subscriptions.id, id), eq(subscriptions.userId, authUser.id)))
       .limit(1);
 
     if (results.length === 0) {
@@ -70,8 +70,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -105,7 +105,7 @@ export async function PATCH(
     const [updated] = await db
       .update(subscriptions)
       .set(updateData)
-      .where(and(eq(subscriptions.id, id), eq(subscriptions.userId, session.user.id)))
+      .where(and(eq(subscriptions.id, id), eq(subscriptions.userId, authUser.id)))
       .returning();
 
     if (!updated) {
@@ -137,8 +137,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -146,7 +146,7 @@ export async function DELETE(
 
     const [deleted] = await db
       .delete(subscriptions)
-      .where(and(eq(subscriptions.id, id), eq(subscriptions.userId, session.user.id)))
+      .where(and(eq(subscriptions.id, id), eq(subscriptions.userId, authUser.id)))
       .returning();
 
     if (!deleted) {

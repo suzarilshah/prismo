@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { vendors, categories } from "@/db/schema";
 import { eq, and, desc, ilike, or } from "drizzle-orm";
 import { z } from "zod";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 import { notifyVendorAdded } from "@/lib/notification-service";
 
 const vendorSchema = z.object({
@@ -23,8 +23,8 @@ const vendorSchema = z.object({
 // GET /api/vendors - List all vendors
 export async function GET(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     const categoryId = searchParams.get("categoryId");
     const favoritesOnly = searchParams.get("favorites") === "true";
 
-    const conditions: any[] = [eq(vendors.userId, session.user.id)];
+    const conditions: any[] = [eq(vendors.userId, authUser.id)];
 
     if (search) {
       conditions.push(
@@ -81,8 +81,8 @@ export async function GET(request: NextRequest) {
 // POST /api/vendors - Create a new vendor
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
     const [newVendor] = await db
       .insert(vendors)
       .values({
-        userId: session.user.id,
+        userId: authUser.id,
         name: validatedData.name,
         categoryId,
         description: validatedData.description,
@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
 
     // Create notification for new vendor
     await notifyVendorAdded(
-      session.user.id,
+      authUser.id,
       validatedData.name,
       newVendor.id
     );

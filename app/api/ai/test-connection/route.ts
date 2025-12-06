@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { aiSettings } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 import { decryptApiKey } from "@/lib/ai/security";
 
 interface TestConnectionRequest {
@@ -15,12 +15,12 @@ interface TestConnectionRequest {
 // POST /api/ai/test-connection - Test AI provider connection
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session?.user?.id) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser?.id) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const userId = session.user.id;
+    const userId = authUser.id;
     const body: TestConnectionRequest = await request.json();
 
     // Validate required fields

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { subscriptions, subscriptionAmountHistory } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 // GET /api/subscriptions/[id]/modify-amount - Get amount change history
 export async function GET(
@@ -10,8 +10,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -21,7 +21,7 @@ export async function GET(
     const subscription = await db.query.subscriptions.findFirst({
       where: and(
         eq(subscriptions.id, id),
-        eq(subscriptions.userId, session.user.id)
+        eq(subscriptions.userId, authUser.id)
       ),
     });
 
@@ -54,8 +54,8 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -67,7 +67,7 @@ export async function POST(
     const subscription = await db.query.subscriptions.findFirst({
       where: and(
         eq(subscriptions.id, id),
-        eq(subscriptions.userId, session.user.id)
+        eq(subscriptions.userId, authUser.id)
       ),
     });
 
@@ -82,7 +82,7 @@ export async function POST(
     // Create history record
     await db.insert(subscriptionAmountHistory).values({
       subscriptionId: id,
-      userId: session.user.id,
+      userId: authUser.id,
       previousAmount: subscription.amount,
       newAmount: newAmount.toString(),
       previousPlanTier: subscription.planTier || null,

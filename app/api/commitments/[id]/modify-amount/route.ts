@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { commitments, commitmentAmountHistory, commitmentPayments } from "@/db/schema";
 import { eq, and, gte, sql } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 // POST /api/commitments/[id]/modify-amount - Upgrade/Downgrade commitment amount
 export async function POST(
@@ -10,8 +10,8 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -35,7 +35,7 @@ export async function POST(
     const [existing] = await db
       .select()
       .from(commitments)
-      .where(and(eq(commitments.id, id), eq(commitments.userId, session.user.id)));
+      .where(and(eq(commitments.id, id), eq(commitments.userId, authUser.id)));
 
     if (!existing) {
       return NextResponse.json({ error: "Commitment not found" }, { status: 404 });
@@ -49,7 +49,7 @@ export async function POST(
     // Create amount history record
     await db.insert(commitmentAmountHistory).values({
       commitmentId: id,
-      userId: session.user.id,
+      userId: authUser.id,
       previousAmount: existing.amount,
       newAmount: newAmount.toString(),
       changeType,
@@ -100,8 +100,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -111,7 +111,7 @@ export async function GET(
     const [existing] = await db
       .select()
       .from(commitments)
-      .where(and(eq(commitments.id, id), eq(commitments.userId, session.user.id)));
+      .where(and(eq(commitments.id, id), eq(commitments.userId, authUser.id)));
 
     if (!existing) {
       return NextResponse.json({ error: "Commitment not found" }, { status: 404 });

@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { commitments, commitmentPayments, categories, subscriptions } from "@/db/schema";
 import { eq, and, desc, gte, lte, or } from "drizzle-orm";
 import { z } from "zod";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 import { notifyCommitmentAdded } from "@/lib/notification-service";
 
 const commitmentSchema = z.object({
@@ -42,11 +42,11 @@ const commitmentSchema = z.object({
 // GET /api/commitments - List all commitments with optional filters
 export async function GET(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
-    const userId = session.user.id;
+    const userId = authUser.id;
 
     const { searchParams } = new URL(request.url);
     const type = searchParams.get("type");
@@ -157,8 +157,8 @@ export async function GET(request: NextRequest) {
 // POST /api/commitments - Create a new commitment
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
     const [newCommitment] = await db
       .insert(commitments)
       .values({
-        userId: session.user.id,
+        userId: authUser.id,
         name: validatedData.name,
         description: validatedData.description,
         amount: validatedData.amount.toString(),
@@ -209,7 +209,7 @@ export async function POST(request: NextRequest) {
     if (nextDue.getMonth() + 1 === currentMonth && nextDue.getFullYear() === currentYear) {
       await db.insert(commitmentPayments).values({
         commitmentId: newCommitment.id,
-        userId: session.user.id,
+        userId: authUser.id,
         year: currentYear,
         month: currentMonth,
         dueDate: nextDue,
@@ -220,7 +220,7 @@ export async function POST(request: NextRequest) {
 
     // Create notification for new commitment
     await notifyCommitmentAdded(
-      session.user.id,
+      authUser.id,
       validatedData.name,
       parseFloat(validatedData.amount.toString()),
       validatedData.currency,

@@ -4,6 +4,8 @@ import { cookies } from "next/headers";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { stackServerApp } from "@/lib/stack";
+import { NextRequest } from "next/server";
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || "prismo-finance-secret-key-change-in-production"
@@ -77,6 +79,66 @@ export async function getSession(): Promise<Session | null> {
   if (!token) return null;
   
   return verifyToken(token);
+}
+
+/**
+ * Unified authentication for API routes
+ * Checks Stack Auth first, then falls back to legacy JWT session
+ * Returns the user ID and basic user info if authenticated
+ */
+export async function getAuthenticatedUser(request: NextRequest): Promise<{
+  id: string;
+  email: string;
+  name: string | null;
+} | null> {
+  try {
+    // First, try Stack Auth (Google OAuth, etc.)
+    const stackUser = await stackServerApp.getUser({ tokenStore: request });
+    
+    if (stackUser) {
+      // Find user in our database by Stack ID or email
+      let dbUser = await db.query.users.findFirst({
+        where: eq(users.stackId, stackUser.id),
+      });
+      
+      if (!dbUser && stackUser.primaryEmail) {
+        dbUser = await db.query.users.findFirst({
+          where: eq(users.email, stackUser.primaryEmail.toLowerCase()),
+        });
+      }
+      
+      if (dbUser) {
+        return {
+          id: dbUser.id,
+          email: dbUser.email,
+          name: dbUser.name,
+        };
+      }
+      
+      // User exists in Stack Auth but not in our DB - this shouldn't happen
+      // but we can still return stack auth info for sync purposes
+      return null;
+    }
+  } catch (error) {
+    // Stack Auth check failed, continue to legacy check
+    console.error("Stack Auth check failed:", error);
+  }
+  
+  // Fall back to legacy JWT session
+  try {
+    const session = await getSession();
+    if (session?.user) {
+      return {
+        id: session.user.id,
+        email: session.user.email,
+        name: session.user.name,
+      };
+    }
+  } catch (error) {
+    console.error("Legacy session check failed:", error);
+  }
+  
+  return null;
 }
 
 export async function deleteSession(): Promise<void> {

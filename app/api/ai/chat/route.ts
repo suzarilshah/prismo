@@ -19,7 +19,7 @@ import { NextRequest } from "next/server";
 import { db } from "@/db";
 import { aiConversations, aiMessages, aiSettings, users } from "@/db/schema";
 import { eq, and, desc, sql } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 import { decryptApiKey } from "@/lib/ai/security";
 import { createAIClient, AIProvider } from "@/lib/ai/clients";
 import { createAgenticRAG } from "@/lib/ai/agentic-rag";
@@ -56,12 +56,12 @@ function checkRateLimit(userId: string): boolean {
 // POST /api/ai/chat - Chat with AI
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session?.user?.id) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser?.id) {
       return Response.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const userId = session.user.id;
+    const userId = authUser.id;
     const body: ChatRequest = await request.json();
 
     // Validate input

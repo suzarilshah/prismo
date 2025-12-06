@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { budgets, categories } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 import { notifyBudgetAdded } from "@/lib/notification-service";
 
 // GET /api/budgets - List all budgets
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -20,7 +20,7 @@ export async function GET() {
       })
       .from(budgets)
       .leftJoin(categories, eq(budgets.categoryId, categories.id))
-      .where(eq(budgets.userId, session.user.id))
+      .where(eq(budgets.userId, authUser.id))
       .orderBy(budgets.createdAt);
 
     return NextResponse.json({
@@ -42,8 +42,8 @@ export async function GET() {
 // POST /api/budgets - Create a new budget
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     const [newBudget] = await db
       .insert(budgets)
       .values({
-        userId: session.user.id,
+        userId: authUser.id,
         categoryId: body.categoryId,
         amount: body.amount.toString(),
         period: body.period || "monthly",
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
 
     // Create notification for new budget
     await notifyBudgetAdded(
-      session.user.id,
+      authUser.id,
       categoryName,
       parseFloat(body.amount),
       "MYR",

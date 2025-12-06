@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { commitments, commitmentPayments } from "@/db/schema";
 import { eq, and, gte } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 // POST /api/commitments/[id]/terminate - Terminate a commitment
 export async function POST(
@@ -10,8 +10,8 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -27,7 +27,7 @@ export async function POST(
     const [existing] = await db
       .select()
       .from(commitments)
-      .where(and(eq(commitments.id, id), eq(commitments.userId, session.user.id)));
+      .where(and(eq(commitments.id, id), eq(commitments.userId, authUser.id)));
 
     if (!existing) {
       return NextResponse.json({ error: "Commitment not found" }, { status: 404 });

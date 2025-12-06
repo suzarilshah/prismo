@@ -12,21 +12,21 @@ import {
   users
 } from "@/db/schema";
 import { eq, and, gte, lte, sum, count, sql, desc, isNull, lt } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 // GET /api/dashboard/stats - Get comprehensive dashboard statistics
 export async function GET(request: NextRequest) {
   try {
-    const session = await getSession();
+    const authUser = await getAuthenticatedUser(request);
     
-    if (!session) {
+    if (!authUser) {
       return NextResponse.json(
         { error: "Not authenticated" },
         { status: 401 }
       );
     }
     
-    const userId = session.user.id;
+    const userId = authUser.id;
 
     // Get date ranges
     const now = new Date();

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { transactions } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 import { notifyTransactionDeleted, notifyIncomeEdited } from "@/lib/notification-service";
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -123,8 +123,8 @@ export async function DELETE(
   context: RouteContext
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -143,7 +143,7 @@ export async function DELETE(
 
     // Create notification for deleted transaction
     await notifyTransactionDeleted(
-      session.user.id,
+      authUser.id,
       parseFloat(deletedTransaction.amount),
       deletedTransaction.currency || "MYR",
       deletedTransaction.type,

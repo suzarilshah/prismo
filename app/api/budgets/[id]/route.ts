@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { budgets, categories } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 // GET /api/budgets/[id]
 export async function GET(
@@ -10,8 +10,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -24,7 +24,7 @@ export async function GET(
       })
       .from(budgets)
       .leftJoin(categories, eq(budgets.categoryId, categories.id))
-      .where(and(eq(budgets.id, id), eq(budgets.userId, session.user.id)))
+      .where(and(eq(budgets.id, id), eq(budgets.userId, authUser.id)))
       .limit(1);
 
     if (results.length === 0) {
@@ -53,8 +53,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -73,7 +73,7 @@ export async function PATCH(
     const [updated] = await db
       .update(budgets)
       .set(updateData)
-      .where(and(eq(budgets.id, id), eq(budgets.userId, session.user.id)))
+      .where(and(eq(budgets.id, id), eq(budgets.userId, authUser.id)))
       .returning();
 
     if (!updated) {
@@ -99,8 +99,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -108,7 +108,7 @@ export async function DELETE(
 
     const [deleted] = await db
       .delete(budgets)
-      .where(and(eq(budgets.id, id), eq(budgets.userId, session.user.id)))
+      .where(and(eq(budgets.id, id), eq(budgets.userId, authUser.id)))
       .returning();
 
     if (!deleted) {

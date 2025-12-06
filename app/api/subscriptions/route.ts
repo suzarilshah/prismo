@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { subscriptions, categories, subscriptionPayments } from "@/db/schema";
 import { eq, and, desc, isNull } from "drizzle-orm";
 import { z } from "zod";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 import { notifySubscriptionAdded } from "@/lib/notification-service";
 
 const subscriptionSchema = z.object({
@@ -26,8 +26,8 @@ const subscriptionSchema = z.object({
 // GET /api/subscriptions - List all subscriptions with payment status
 export async function GET(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
       : [now.getFullYear(), now.getMonth() + 1];
 
     const conditions = [
-      eq(subscriptions.userId, session.user.id),
+      eq(subscriptions.userId, authUser.id),
       isNull(subscriptions.terminatedAt), // Exclude terminated
     ];
 
@@ -139,8 +139,8 @@ export async function GET(request: NextRequest) {
 // POST /api/subscriptions - Create a new subscription
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
     const [newSubscription] = await db
       .insert(subscriptions)
       .values({
-        userId: session.user.id,
+        userId: authUser.id,
         categoryId,
         name: validatedData.name,
         amount: validatedData.amount.toString(),
@@ -185,7 +185,7 @@ export async function POST(request: NextRequest) {
     ) {
       await db.insert(subscriptionPayments).values({
         subscriptionId: newSubscription.id,
-        userId: session.user.id,
+        userId: authUser.id,
         billingYear: now.getFullYear(),
         billingMonth: now.getMonth() + 1,
         expectedAmount: validatedData.amount.toString(),
@@ -195,7 +195,7 @@ export async function POST(request: NextRequest) {
 
     // Create notification for new subscription
     await notifySubscriptionAdded(
-      session.user.id,
+      authUser.id,
       validatedData.name,
       parseFloat(validatedData.amount.toString()),
       validatedData.currency,

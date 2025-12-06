@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { goals } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { z } from "zod";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 import { notifyGoalEdited, notifyGoalProgress } from "@/lib/notification-service";
 
 const updateGoalSchema = z.object({
@@ -25,8 +25,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -35,7 +35,7 @@ export async function GET(
     const [goal] = await db
       .select()
       .from(goals)
-      .where(and(eq(goals.id, id), eq(goals.userId, session.user.id)))
+      .where(and(eq(goals.id, id), eq(goals.userId, authUser.id)))
       .limit(1);
 
     if (!goal) {
@@ -65,8 +65,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -78,7 +78,7 @@ export async function PATCH(
     const [existingGoal] = await db
       .select()
       .from(goals)
-      .where(and(eq(goals.id, id), eq(goals.userId, session.user.id)))
+      .where(and(eq(goals.id, id), eq(goals.userId, authUser.id)))
       .limit(1);
 
     if (!existingGoal) {
@@ -112,7 +112,7 @@ export async function PATCH(
     const [updated] = await db
       .update(goals)
       .set(updateData)
-      .where(and(eq(goals.id, id), eq(goals.userId, session.user.id)))
+      .where(and(eq(goals.id, id), eq(goals.userId, authUser.id)))
       .returning();
 
     if (!updated) {
@@ -129,7 +129,7 @@ export async function PATCH(
     for (const milestone of milestones) {
       if (oldProgress < milestone && newProgress >= milestone) {
         await notifyGoalProgress(
-          session.user.id,
+          authUser.id,
           updated.name,
           milestone,
           updated.id
@@ -140,7 +140,7 @@ export async function PATCH(
 
     // Notify goal edited (if not just a progress update)
     if (validatedData.name || validatedData.targetAmount || validatedData.deadline !== undefined) {
-      await notifyGoalEdited(session.user.id, updated.name, updated.id);
+      await notifyGoalEdited(authUser.id, updated.name, updated.id);
     }
 
     return NextResponse.json({
@@ -168,8 +168,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -177,7 +177,7 @@ export async function DELETE(
 
     const [deleted] = await db
       .delete(goals)
-      .where(and(eq(goals.id, id), eq(goals.userId, session.user.id)))
+      .where(and(eq(goals.id, id), eq(goals.userId, authUser.id)))
       .returning();
 
     if (!deleted) {

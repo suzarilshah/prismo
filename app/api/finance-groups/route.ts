@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { financeGroups, financeGroupMembers } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 import { z } from "zod";
 import { notifyFinanceGroupCreated } from "@/lib/notification-service";
 
@@ -19,8 +19,8 @@ const createSchema = z.object({
 // GET /api/finance-groups - Get all finance groups for user
 export async function GET(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     const ownedGroups = await db
       .select()
       .from(financeGroups)
-      .where(eq(financeGroups.ownerId, session.user.id))
+      .where(eq(financeGroups.ownerId, authUser.id))
       .orderBy(desc(financeGroups.isDefault), desc(financeGroups.lastActivityAt));
 
     // Get groups where user is a member (not owner)
@@ -41,13 +41,13 @@ export async function GET(request: NextRequest) {
       .innerJoin(financeGroups, eq(financeGroupMembers.financeGroupId, financeGroups.id))
       .where(
         and(
-          eq(financeGroupMembers.userId, session.user.id),
+          eq(financeGroupMembers.userId, authUser.id),
           eq(financeGroupMembers.status, "active")
         )
       );
 
     const memberGroups = memberships
-      .filter((m) => m.group.ownerId !== session.user.id)
+      .filter((m) => m.group.ownerId !== authUser.id)
       .map((m) => ({
         ...m.group,
         membership: m.membership,
@@ -77,8 +77,8 @@ export async function GET(request: NextRequest) {
 // POST /api/finance-groups - Create a new finance group
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -90,14 +90,14 @@ export async function POST(request: NextRequest) {
       await db
         .update(financeGroups)
         .set({ isDefault: false })
-        .where(eq(financeGroups.ownerId, session.user.id));
+        .where(eq(financeGroups.ownerId, authUser.id));
     }
 
     // Create the finance group
     const [group] = await db
       .insert(financeGroups)
       .values({
-        ownerId: session.user.id,
+        ownerId: authUser.id,
         ...validatedData,
       })
       .returning();
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
     // Add owner as a member with full permissions
     await db.insert(financeGroupMembers).values({
       financeGroupId: group.id,
-      userId: session.user.id,
+      userId: authUser.id,
       role: "owner",
       relationship: "self",
       permissions: {
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Create notification for new finance group
-    await notifyFinanceGroupCreated(session.user.id, group.name, group.id);
+    await notifyFinanceGroupCreated(authUser.id, group.name, group.id);
 
     return NextResponse.json({
       success: true,

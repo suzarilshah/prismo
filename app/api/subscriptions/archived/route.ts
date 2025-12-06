@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { subscriptions } from "@/db/schema";
 import { eq, and, isNotNull } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 // GET /api/subscriptions/archived - Get all archived/cancelled subscriptions
 export async function GET(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
       .from(subscriptions)
       .where(
         and(
-          eq(subscriptions.userId, session.user.id),
+          eq(subscriptions.userId, authUser.id),
           isNotNull(subscriptions.terminatedAt)
         )
       )
@@ -54,8 +54,8 @@ export async function GET(request: NextRequest) {
 // POST /api/subscriptions/archived - Restore a cancelled subscription
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     const subscription = await db.query.subscriptions.findFirst({
       where: and(
         eq(subscriptions.id, subscriptionId),
-        eq(subscriptions.userId, session.user.id)
+        eq(subscriptions.userId, authUser.id)
       ),
     });
 

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { aiSettings } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 import { 
   encryptApiKey, 
   decryptApiKey, 
@@ -15,12 +15,12 @@ import {
 // GET /api/ai/settings - Get user's AI settings
 export async function GET(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session?.user?.id) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser?.id) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const userId = session.user.id;
+    const userId = authUser.id;
 
     // Fetch AI settings for user
     const [settings] = await db
@@ -84,12 +84,12 @@ export async function GET(request: NextRequest) {
 // POST /api/ai/settings - Create or update AI settings
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session?.user?.id) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser?.id) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const userId = session.user.id;
+    const userId = authUser.id;
     const body = await request.json();
 
     // Validate provider if provided
@@ -233,12 +233,12 @@ export async function POST(request: NextRequest) {
 // DELETE /api/ai/settings - Delete AI settings (reset to defaults)
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session?.user?.id) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser?.id) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const userId = session.user.id;
+    const userId = authUser.id;
 
     await db
       .delete(aiSettings)

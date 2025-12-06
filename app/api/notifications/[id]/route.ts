@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { notifications, notificationActivityLog } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 // GET /api/notifications/[id] - Get a single notification
 export async function GET(
@@ -10,8 +10,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -23,7 +23,7 @@ export async function GET(
       .where(
         and(
           eq(notifications.id, id),
-          eq(notifications.userId, session.user.id)
+          eq(notifications.userId, authUser.id)
         )
       )
       .limit(1);
@@ -54,8 +54,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -70,7 +70,7 @@ export async function PATCH(
       .where(
         and(
           eq(notifications.id, id),
-          eq(notifications.userId, session.user.id)
+          eq(notifications.userId, authUser.id)
         )
       )
       .limit(1);
@@ -113,7 +113,7 @@ export async function PATCH(
     if (action) {
       await db.insert(notificationActivityLog).values({
         notificationId: id,
-        userId: session.user.id,
+        userId: authUser.id,
         action,
       });
     }
@@ -137,8 +137,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -151,7 +151,7 @@ export async function DELETE(
       .where(
         and(
           eq(notifications.id, id),
-          eq(notifications.userId, session.user.id)
+          eq(notifications.userId, authUser.id)
         )
       )
       .limit(1);

@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { categories } from "@/db/schema";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 
 // Default expense categories with Malaysian context
@@ -89,14 +89,14 @@ const DEFAULT_INCOME_CATEGORIES = [
 ];
 
 // POST /api/categories/seed - Seed default categories for user
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const userId = session.user.id;
+    const userId = authUser.id;
 
     // Check if user already has categories
     const existingCategories = await db

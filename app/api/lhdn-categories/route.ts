@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { lhdnReliefCategories } from "@/db/schema";
 import { eq, and, gte, lte, or, isNull } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 import { LHDN_RELIEF_CATEGORIES, getActiveCategoriesForYear, calculateMalaysianTax } from "@/db/seed-lhdn-categories";
 
 // GET /api/lhdn-categories - Get all LHDN relief categories
@@ -72,8 +72,8 @@ export async function GET(request: NextRequest) {
 // POST /api/lhdn-categories/seed - Seed LHDN categories to database
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 

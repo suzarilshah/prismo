@@ -13,7 +13,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { aiConversations, aiMessages } from "@/db/schema";
 import { eq, and, desc, asc } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -22,13 +22,13 @@ interface RouteParams {
 // GET /api/ai/conversations/[id] - Get conversation with messages
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const session = await getSession();
-    if (!session?.user?.id) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser?.id) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
     const { id: conversationId } = await params;
-    const userId = session.user.id;
+    const userId = authUser.id;
     const { searchParams } = new URL(request.url);
 
     // Pagination for messages
@@ -109,13 +109,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 // PATCH /api/ai/conversations/[id] - Update conversation
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
-    const session = await getSession();
-    if (!session?.user?.id) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser?.id) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
     const { id: conversationId } = await params;
-    const userId = session.user.id;
+    const userId = authUser.id;
     const body = await request.json();
 
     // Verify ownership
@@ -176,13 +176,13 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 // DELETE /api/ai/conversations/[id] - Delete conversation
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const session = await getSession();
-    if (!session?.user?.id) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser?.id) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
     const { id: conversationId } = await params;
-    const userId = session.user.id;
+    const userId = authUser.id;
 
     // Verify ownership and delete (messages deleted via cascade)
     const result = await db

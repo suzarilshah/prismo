@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Client, Storage, ID } from "node-appwrite";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 // Initialize Appwrite client for server-side
 const client = new Client()
@@ -28,8 +28,8 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     // Create a proper filename with timestamp
     const timestamp = Date.now();
     const extension = file.name.split(".").pop() || "jpg";
-    const fileName = `${purpose}_${session.user.id}_${timestamp}.${extension}`;
+    const fileName = `${purpose}_${authUser.id}_${timestamp}.${extension}`;
 
     // Convert File to Buffer for node-appwrite
     const arrayBuffer = await file.arrayBuffer();
@@ -117,8 +117,8 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     // Check authentication
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 

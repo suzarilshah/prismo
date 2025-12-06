@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { taxDeductions, transactions, categories } from "@/db/schema";
 import { eq, and, desc, gte, lte, isNotNull } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 import { notifyTaxDeductionAdded } from "@/lib/notification-service";
 
 // LHDN Relief Categories with YA 2024 limits (Malaysian Tax)
@@ -39,8 +39,8 @@ function mapToLhdnCategory(taxCategory: string | null): string | null {
 // GET /api/tax-deductions - List all tax deductions with computed data
 export async function GET(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     const deductions = await db
       .select()
       .from(taxDeductions)
-      .where(and(eq(taxDeductions.userId, session.user.id), eq(taxDeductions.year, year)))
+      .where(and(eq(taxDeductions.userId, authUser.id), eq(taxDeductions.year, year)))
       .orderBy(desc(taxDeductions.createdAt));
 
     let taxDeductibleTransactions: any[] = [];
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
         .leftJoin(categories, eq(transactions.categoryId, categories.id))
         .where(
           and(
-            eq(transactions.userId, session.user.id),
+            eq(transactions.userId, authUser.id),
             eq(transactions.type, "expense"),
             gte(transactions.date, startOfYear),
             lte(transactions.date, endOfYear),
@@ -153,8 +153,8 @@ export async function GET(request: NextRequest) {
 // POST /api/tax-deductions - Create a new tax deduction
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
     const [newDeduction] = await db
       .insert(taxDeductions)
       .values({
-        userId: session.user.id,
+        userId: authUser.id,
         transactionId: body.transactionId || null,
         category: body.category,
         lhdnCategory,
@@ -183,7 +183,7 @@ export async function POST(request: NextRequest) {
 
     // Create notification for new tax deduction
     await notifyTaxDeductionAdded(
-      session.user.id,
+      authUser.id,
       lhdnCategory || body.category,
       parseFloat(body.amount),
       "MYR",

@@ -2,16 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { creditCards, transactions, creditCardStatements, categories } from "@/db/schema";
 import { eq, and, desc, sql } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 // GET - List all credit cards with spending stats
 export async function GET(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const userId = session.user.id;
+    const userId = authUser.id;
 
     const searchParams = request.nextUrl.searchParams;
     const includeStats = searchParams.get("includeStats") === "true";
@@ -113,11 +113,11 @@ export async function GET(request: NextRequest) {
 // POST - Create new credit card
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const userId = session.user.id;
+    const userId = authUser.id;
 
     const body = await request.json();
     const {

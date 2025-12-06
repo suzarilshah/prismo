@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { notifications, notificationActivityLog } from "@/db/schema";
 import { eq, and, desc, sql, lt, isNull, or } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 // GET /api/notifications - Get user notifications with pagination
 export async function GET(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 
     // Build conditions
     const conditions = [
-      eq(notifications.userId, session.user.id),
+      eq(notifications.userId, authUser.id),
       or(
         isNull(notifications.expiresAt),
         sql`${notifications.expiresAt} > NOW()`
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
       .from(notifications)
       .where(
         and(
-          eq(notifications.userId, session.user.id),
+          eq(notifications.userId, authUser.id),
           eq(notifications.isRead, false),
           eq(notifications.isDismissed, false),
           or(
@@ -91,8 +91,8 @@ export async function GET(request: NextRequest) {
 // POST /api/notifications/mark-all-read - Mark all notifications as read
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
         .from(notifications)
         .where(
           and(
-            eq(notifications.userId, session.user.id),
+            eq(notifications.userId, authUser.id),
             eq(notifications.isRead, false)
           )
         );
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
         .set({ isRead: true, readAt: new Date(), updatedAt: new Date() })
         .where(
           and(
-            eq(notifications.userId, session.user.id),
+            eq(notifications.userId, authUser.id),
             eq(notifications.isRead, false)
           )
         );
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
         await db.insert(notificationActivityLog).values(
           unreadNotifications.map((n) => ({
             notificationId: n.id,
-            userId: session.user.id,
+            userId: authUser.id,
             action: "read",
           }))
         );
@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
         .from(notifications)
         .where(
           and(
-            eq(notifications.userId, session.user.id),
+            eq(notifications.userId, authUser.id),
             eq(notifications.isDismissed, false)
           )
         );
@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
         .set({ isDismissed: true, dismissedAt: new Date(), updatedAt: new Date() })
         .where(
           and(
-            eq(notifications.userId, session.user.id),
+            eq(notifications.userId, authUser.id),
             eq(notifications.isDismissed, false)
           )
         );
@@ -165,7 +165,7 @@ export async function POST(request: NextRequest) {
         await db.insert(notificationActivityLog).values(
           dismissedNotifications.map((n) => ({
             notificationId: n.id,
-            userId: session.user.id,
+            userId: authUser.id,
             action: "dismissed",
           }))
         );

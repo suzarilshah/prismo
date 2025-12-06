@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { monthlyPcbRecords, taxYears, users } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 import { z } from "zod";
 
 const pcbSchema = z.object({
@@ -26,9 +26,9 @@ const pcbSchema = z.object({
 });
 
 // Helper to get user ID from session or demo user
-async function getUserId(session: any): Promise<string | null> {
-  if (session?.user?.id) {
-    return session.user.id;
+async function getUserId(authUser: any): Promise<string | null> {
+  if (authUser?.id) {
+    return authUser.id;
   }
   // Fallback to demo user for development
   const [demoUser] = await db
@@ -42,8 +42,8 @@ async function getUserId(session: any): Promise<string | null> {
 // GET /api/pcb - Get PCB records for a year
 export async function GET(request: NextRequest) {
   try {
-    const session = await getSession();
-    const userId = await getUserId(session);
+    const authUser = await getAuthenticatedUser(request);
+    const userId = await getUserId(authUser);
     
     if (!userId) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
@@ -102,8 +102,8 @@ export async function GET(request: NextRequest) {
 // POST /api/pcb - Create or update a PCB record
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
-    const userId = await getUserId(session);
+    const authUser = await getAuthenticatedUser(request);
+    const userId = await getUserId(authUser);
     
     if (!userId) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });

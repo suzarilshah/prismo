@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { categories } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { z } from "zod";
-import { getSession } from "@/lib/auth";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 const categorySchema = z.object({
   name: z.string().min(1).max(100),
@@ -80,8 +80,8 @@ async function seedCategoriesForUser(userId: string) {
 // GET /api/categories - List all categories
 export async function GET(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -92,14 +92,14 @@ export async function GET(request: NextRequest) {
     const existingCategories = await db
       .select()
       .from(categories)
-      .where(eq(categories.userId, session.user.id))
+      .where(eq(categories.userId, authUser.id))
       .limit(1);
 
     if (existingCategories.length === 0) {
-      await seedCategoriesForUser(session.user.id);
+      await seedCategoriesForUser(authUser.id);
     }
 
-    const conditions = [eq(categories.userId, session.user.id)];
+    const conditions = [eq(categories.userId, authUser.id)];
 
     if (type) {
       conditions.push(eq(categories.type, type as "income" | "expense"));
@@ -127,8 +127,8 @@ export async function GET(request: NextRequest) {
 // POST /api/categories - Create a new category
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const authUser = await getAuthenticatedUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
     const [newCategory] = await db
       .insert(categories)
       .values({
-        userId: session.user.id,
+        userId: authUser.id,
         ...validatedData,
         isSystem: false,
       })
