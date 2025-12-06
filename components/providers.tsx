@@ -16,6 +16,22 @@ export function Providers({ children }: { children: React.ReactNode }) {
           queries: {
             staleTime: 60 * 1000, // 1 minute
             refetchOnWindowFocus: false,
+            retry: (failureCount, error) => {
+              // Don't retry on 401/403 auth errors
+              if (error instanceof Error && (
+                error.message.includes("401") || 
+                error.message.includes("403") ||
+                error.message.includes("Not authenticated")
+              )) {
+                return false;
+              }
+              // Retry up to 2 times for other errors
+              return failureCount < 2;
+            },
+            retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+          },
+          mutations: {
+            retry: false, // Don't retry mutations
           },
         },
       })
