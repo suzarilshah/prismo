@@ -279,12 +279,13 @@ export default function LandingPage() {
               </div>
               
               {/* Dashboard Content - Real Screenshot */}
-              <div className="relative w-full aspect-[16/9] max-h-[400px] overflow-hidden">
+              <div className="relative w-full">
                 <Image
                   src="/screenshots/dashboard-preview.png"
                   alt="Prismo Dashboard"
-                  fill
-                  className="object-cover object-top"
+                  width={1920}
+                  height={1080}
+                  className="w-full h-auto"
                   priority
                 />
               </div>
