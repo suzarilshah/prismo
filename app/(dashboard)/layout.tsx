@@ -54,6 +54,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
 import { MobileBottomNav } from "@/components/ui/mobile-nav";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 // Finance Group types
 interface FinanceGroup {
@@ -412,7 +413,8 @@ export default function DashboardLayout({
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
             <NotificationDropdown />
             
             <div className="h-6 w-px bg-border mx-2" />

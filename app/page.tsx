@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { 
   ArrowRight, 
@@ -271,48 +272,21 @@ export default function LandingPage() {
                 <div className="flex-1 flex justify-center">
                   <div className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-white/5 text-xs text-white/40">
                     <Lock className="w-3 h-3" />
-                    app.prismo.finance
+                    prismo.airail.uk
                   </div>
                 </div>
                 <div className="w-16" />
               </div>
               
-              {/* Dashboard Content */}
-              <div className="p-6 grid grid-cols-12 gap-4 h-[300px] overflow-hidden">
-                {/* Sidebar Placeholder */}
-                <div className="col-span-2 space-y-3 border-r border-white/5 pr-4">
-                  {[1,2,3,4,5].map(i => (
-                    <div key={i} className={`h-8 rounded-lg ${i === 1 ? 'bg-blue-500/20' : 'bg-white/5'}`} />
-                  ))}
-                </div>
-                
-                {/* Main Content */}
-                <div className="col-span-10 space-y-4">
-                  {/* Header */}
-                  <div className="flex justify-between items-center">
-                    <div className="h-8 w-40 rounded-lg bg-white/10" />
-                    <div className="h-8 w-24 rounded-lg bg-blue-500/20" />
-                  </div>
-                  
-                  {/* Stats Cards */}
-                  <div className="grid grid-cols-4 gap-3">
-                    {['bg-emerald-500/10', 'bg-blue-500/10', 'bg-purple-500/10', 'bg-orange-500/10'].map((bg, i) => (
-                      <div key={i} className={`p-4 rounded-xl ${bg} border border-white/5`}>
-                        <div className="h-3 w-16 bg-white/20 rounded mb-3" />
-                        <div className="h-6 w-24 bg-white/30 rounded" />
-                      </div>
-                    ))}
-                  </div>
-                  
-                  {/* Chart */}
-                  <div className="h-32 rounded-xl bg-white/5 border border-white/5 p-4 relative overflow-hidden">
-                    <div className="absolute bottom-0 left-0 right-0 flex items-end gap-1 px-4 pb-2">
-                      {[40, 65, 45, 80, 55, 70, 60, 90, 50, 85, 75, 95].map((h, i) => (
-                        <div key={i} className="flex-1 bg-gradient-to-t from-blue-500 to-purple-500 rounded-t opacity-60" style={{ height: `${h}%` }} />
-                      ))}
-                    </div>
-                  </div>
-                </div>
+              {/* Dashboard Content - Real Screenshot */}
+              <div className="relative w-full aspect-[16/9] max-h-[400px] overflow-hidden">
+                <Image
+                  src="/screenshots/dashboard-preview.png"
+                  alt="Prismo Dashboard"
+                  fill
+                  className="object-cover object-top"
+                  priority
+                />
               </div>
               
             </div>
