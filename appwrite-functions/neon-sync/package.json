@@ -1,0 +1,22 @@
+{
+  "name": "prismo-neon-sync",
+  "version": "1.0.0",
+  "description": "Appwrite function to sync data directly from Neon PostgreSQL for Prismo Finance",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.9.0"
+  },
+  "keywords": [
+    "appwrite",
+    "neon",
+    "postgresql",
+    "serverless",
+    "prismo"
+  ],
+  "author": "Prismo Finance",
+  "license": "MIT"
+}

@@ -1,0 +1,72 @@
+<svg width="160" height="56" viewBox="0 0 160 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- PRISMO WORDMARK ONLY - For compact spaces -->
+  <defs>
+    <!-- Vibrant gradient for text -->
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#C084FC;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#F472B6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#22D3EE;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- White gradient for dark mode -->
+    <linearGradient id="textWhite" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F0F9FF;stop-opacity:0.95" />
+    </linearGradient>
+  </defs>
+
+  <!-- PRISMO typography -->
+  <g id="wordmark-only" transform="translate(5, 0)">
+    <!-- P -->
+    <path d="M 4 14 L 4 42 M 4 16 L 14 16 C 18 16 20.5 18.5 20.5 22 C 20.5 25.5 18 28 14 28 L 4 28"
+          stroke="url(#textWhite)"
+          stroke-width="3.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="none"/>
+
+    <!-- R -->
+    <path d="M 28 14 L 28 42 M 28 16 L 38 16 C 42 16 44.5 18.5 44.5 21.5 C 44.5 24.5 42 26.5 38 26.5 L 28 26.5 M 37 26.5 L 44.5 42"
+          stroke="url(#textWhite)"
+          stroke-width="3.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="none"/>
+
+    <!-- I (capital letter) -->
+    <path d="M 52 14 L 52 42"
+          stroke="url(#textWhite)"
+          stroke-width="3.5"
+          stroke-linecap="round"
+          fill="none"/>
+
+    <!-- S -->
+    <path d="M 70 20 C 67 16 63 16 60 18 C 57 20 57 23 60 24.5 C 63 26 66 26.5 69 28.5 C 72 30.5 72 34 69 36.5 C 66 39 62 39 59 36"
+          stroke="url(#textWhite)"
+          stroke-width="3.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="none"/>
+
+    <!-- M -->
+    <path d="M 80 42 L 80 14 L 89 32 L 98 14 L 98 42"
+          stroke="url(#textWhite)"
+          stroke-width="3.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="none"/>
+
+    <!-- O -->
+    <ellipse cx="116" cy="28" rx="9" ry="14"
+          stroke="url(#textWhite)"
+          stroke-width="3.5"
+          fill="none"/>
+  </g>
+
+  <!-- Gradient underline accent -->
+  <line x1="9" y1="48" x2="150" y2="48"
+        stroke="url(#textGrad)"
+        stroke-width="2"
+        opacity="0.5"
+        stroke-linecap="round"/>
+</svg>

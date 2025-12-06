@@ -1,0 +1,42 @@
+{
+    "$schema": "https://json.appwrite.io/appwrite.json",
+    "projectId": "prismo",
+    "projectName": "Prismo Finance",
+    "functions": [
+        {
+            "$id": "neon-sync",
+            "name": "Neon Database Sync",
+            "runtime": "node-18.0",
+            "entrypoint": "index.js",
+            "path": "appwrite-functions/neon-sync",
+            "execute": [
+                "any"
+            ],
+            "timeout": 30,
+            "commands": "npm install",
+            "events": [],
+            "scopes": [
+                "databases.read",
+                "databases.write"
+            ]
+        },
+        {
+            "$id": "daily-reminder-check",
+            "name": "Daily Reminder Check",
+            "runtime": "node-18.0",
+            "entrypoint": "index.js",
+            "path": "appwrite-functions/daily-reminder-check",
+            "execute": [
+                "any"
+            ],
+            "timeout": 60,
+            "commands": "npm install",
+            "schedule": "0 0 * * *",
+            "events": [],
+            "scopes": [
+                "databases.read",
+                "databases.write"
+            ]
+        }
+    ]
+}

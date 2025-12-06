@@ -1,0 +1,294 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-tight;
+  }
+}
+
+@layer utilities {
+  /* Grid pattern for backgrounds */
+  .bg-grid-pattern-dark {
+    background-size: 40px 40px;
+    background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  }
+
+  /* Premium card style */
+  .card-bento {
+    @apply bg-white/[0.02] border border-white/[0.05] rounded-3xl p-6 transition-all duration-300 hover:bg-white/[0.04] hover:border-white/10;
+  }
+
+  /* Glass effect */
+  .glass {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10;
+  }
+
+  /* Smooth reveal animation */
+  .animate-reveal {
+    animation: reveal 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  @keyframes reveal {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Data card for dashboard */
+  .data-card {
+    @apply bg-card border border-border rounded-2xl transition-all duration-300 hover:border-primary/20;
+  }
+}
+
+
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* ============================================ */
+/* MOBILE-FIRST RESPONSIVE UTILITIES */
+/* ============================================ */
+
+@layer utilities {
+  /* Safe Area Insets for notched phones */
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  
+  .safe-area-left {
+    padding-left: env(safe-area-inset-left, 0px);
+  }
+  
+  .safe-area-right {
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+  
+  .safe-area-x {
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+  
+  .safe-area-y {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Touch-friendly minimum sizes (44px Apple HIG) */
+  .touch-target {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  .touch-target-sm {
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  /* Smooth scrolling for mobile */
+  .scroll-smooth {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Mobile card styles */
+  .mobile-card {
+    @apply bg-card border border-border rounded-2xl p-4 transition-all duration-200;
+  }
+  
+  .mobile-card-pressed {
+    @apply scale-[0.98] bg-muted/50;
+  }
+
+  /* Pull to refresh indicator space */
+  .ptr-space {
+    padding-top: 60px;
+    margin-top: -60px;
+  }
+
+  /* Mobile list item */
+  .mobile-list-item {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl transition-colors;
+    @apply active:bg-muted/70;
+  }
+
+  /* Horizontal scroll snap */
+  .snap-x-mandatory {
+    scroll-snap-type: x mandatory;
+  }
+  
+  .snap-start {
+    scroll-snap-align: start;
+  }
+  
+  .snap-center {
+    scroll-snap-align: center;
+  }
+
+  /* Mobile bottom padding for bottom nav */
+  .pb-mobile-nav {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  }
+  
+  @media (min-width: 768px) {
+    .pb-mobile-nav {
+      padding-bottom: 0;
+    }
+  }
+
+  /* Touch feedback */
+  .touch-feedback {
+    -webkit-tap-highlight-color: transparent;
+    @apply active:opacity-70 transition-opacity duration-150;
+  }
+  
+  .touch-scale {
+    -webkit-tap-highlight-color: transparent;
+    @apply active:scale-[0.97] transition-transform duration-150;
+  }
+
+  /* Mobile header with blur */
+  .mobile-header {
+    @apply sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border;
+    @apply safe-area-top;
+  }
+
+  /* Floating elements above bottom nav */
+  .above-mobile-nav {
+    @apply mb-20 md:mb-0;
+  }
+
+  /* Mobile typography adjustments */
+  @media (max-width: 640px) {
+    .mobile-text-responsive {
+      font-size: clamp(0.875rem, 4vw, 1rem);
+    }
+    
+    .mobile-heading-responsive {
+      font-size: clamp(1.5rem, 6vw, 2rem);
+    }
+  }
+
+  /* Prevent text selection on interactive elements */
+  .no-select {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* iOS-style blur backgrounds */
+  .blur-ios {
+    @apply bg-background/60 backdrop-blur-2xl backdrop-saturate-150;
+  }
+
+  /* Mobile swipe hint animation */
+  @keyframes swipe-hint {
+    0%, 100% {
+      transform: translateX(0);
+      opacity: 0.5;
+    }
+    50% {
+      transform: translateX(-10px);
+      opacity: 1;
+    }
+  }
+  
+  .animate-swipe-hint {
+    animation: swipe-hint 2s ease-in-out infinite;
+  }
+
+  /* Skeleton loading for mobile */
+  .skeleton-mobile {
+    @apply animate-pulse bg-muted rounded-lg;
+  }
+}
