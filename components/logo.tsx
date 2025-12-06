@@ -28,7 +28,7 @@ export function Logo({
     <div className={`flex items-center gap-2.5 ${className}`}>
       {(variant === "full" || variant === "icon") && (
         <Image
-          src="/logos/prismo-icon.svg"
+          src="/logos/prismo-icon-adaptive.svg"
           alt="Prismo Finance"
           width={iconDims.width}
           height={iconDims.height}
@@ -37,7 +37,7 @@ export function Logo({
         />
       )}
       {(variant === "full" || variant === "wordmark") && (
-        <span className={`font-open-sans font-bold tracking-tight text-white ${fontSize}`}>
+        <span className={`font-open-sans font-bold tracking-tight text-foreground ${fontSize}`}>
           Prismo
         </span>
       )}

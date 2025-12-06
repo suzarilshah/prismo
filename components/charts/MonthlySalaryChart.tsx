@@ -42,8 +42,8 @@ const formatCurrency = (value: number) => {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-zinc-900/95 backdrop-blur-md border border-white/10 rounded-xl p-4 shadow-2xl min-w-[200px]">
-        <p className="text-sm font-semibold text-white mb-3 border-b border-white/10 pb-2">{label}</p>
+      <div className="bg-card/95 backdrop-blur-md border border-border rounded-xl p-4 shadow-2xl min-w-[200px]">
+        <p className="text-sm font-semibold text-foreground mb-3 border-b border-border pb-2">{label}</p>
         {payload.map((entry: any, index: number) => (
           entry.value > 0 && (
             <div key={index} className="flex items-center justify-between gap-4 text-sm py-1">
@@ -52,7 +52,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
                   className="w-2 h-2 rounded-full"
                   style={{ backgroundColor: entry.color }}
                 />
-                <span className="text-zinc-400">{entry.name}</span>
+                <span className="text-muted-foreground">{entry.name}</span>
               </span>
               <span className="font-mono font-semibold" style={{ color: entry.color }}>
                 {formatCurrency(entry.value)}
@@ -74,17 +74,17 @@ export function MonthlySalaryChart({ data, avgMonthlySalary }: MonthlySalaryChar
           data={data}
           margin={{ top: 20, right: 20, left: 0, bottom: 0 }}
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
           <XAxis
             dataKey="monthName"
             axisLine={false}
             tickLine={false}
-            tick={{ fill: "#71717a", fontSize: 12 }}
+            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
           />
           <YAxis
             axisLine={false}
             tickLine={false}
-            tick={{ fill: "#71717a", fontSize: 12 }}
+            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
             tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
           />
           <Tooltip content={<CustomTooltip />} />
@@ -92,7 +92,7 @@ export function MonthlySalaryChart({ data, avgMonthlySalary }: MonthlySalaryChar
             wrapperStyle={{ paddingTop: "20px" }}
             iconType="circle"
             formatter={(value) => (
-              <span className="text-zinc-400 text-sm">{value}</span>
+              <span className="text-muted-foreground text-sm">{value}</span>
             )}
           />
           <Bar dataKey="salary" name="Salary" stackId="income" fill="#3b82f6" radius={[0, 0, 0, 0]} />
@@ -105,10 +105,10 @@ export function MonthlySalaryChart({ data, avgMonthlySalary }: MonthlySalaryChar
             type="monotone"
             dataKey="total"
             name="Total"
-            stroke="#ffffff"
+            stroke="hsl(var(--primary))"
             strokeWidth={2}
-            dot={{ fill: "#ffffff", strokeWidth: 0, r: 4 }}
-            activeDot={{ r: 6, stroke: "#ffffff", strokeWidth: 2 }}
+            dot={{ fill: "hsl(var(--primary))", strokeWidth: 0, r: 4 }}
+            activeDot={{ r: 6, stroke: "hsl(var(--primary))", strokeWidth: 2 }}
           />
         </ComposedChart>
       </ResponsiveContainer>

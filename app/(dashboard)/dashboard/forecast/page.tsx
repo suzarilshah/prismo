@@ -302,22 +302,23 @@ export default function ForecastPage() {
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={forecastData?.chartData || []}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
                     <XAxis 
                       dataKey="month" 
-                      tick={{ fill: "#888", fontSize: 12 }}
-                      axisLine={{ stroke: "#333" }}
+                      tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                      axisLine={{ stroke: "hsl(var(--border))" }}
                     />
                     <YAxis 
-                      tick={{ fill: "#888", fontSize: 12 }}
-                      axisLine={{ stroke: "#333" }}
+                      tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                      axisLine={{ stroke: "hsl(var(--border))" }}
                       tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
                     />
                     <Tooltip 
                       contentStyle={{ 
-                        backgroundColor: "#111", 
-                        border: "1px solid #333",
+                        backgroundColor: "hsl(var(--card))", 
+                        border: "1px solid hsl(var(--border))",
                         borderRadius: "8px",
+                        color: "hsl(var(--foreground))",
                       }}
                       formatter={(value: any) => formatCurrency(value)}
                     />
