@@ -17,8 +17,10 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "10mb",
     },
   },
-  // Use Turbopack (Next.js 16 default)
-  turbopack: {},
+  // Use Turbopack and set workspace root
+  turbopack: {
+    root: __dirname,
+  },
 };
 
 export default nextConfig;

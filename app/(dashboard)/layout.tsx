@@ -211,28 +211,25 @@ export default function DashboardLayout({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#030303] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <LoadingSpinner size="xl" text="Loading your dashboard..." variant="default" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#030303] text-foreground flex relative">
+    <div className="min-h-screen bg-background text-foreground flex relative">
       {/* Grid Background Pattern */}
-      <div className="fixed inset-0 opacity-[0.02] pointer-events-none" style={{
-        backgroundSize: '60px 60px',
-        backgroundImage: 'linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)'
-      }} />
+      <div className="fixed inset-0 opacity-[0.02] dark:opacity-[0.02] pointer-events-none bg-grid-pattern" />
       
       {/* Ambient Background Gradients */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-500/5 blur-[150px] rounded-full" />
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-500/5 blur-[150px] rounded-full" />
+        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/5 blur-[150px] rounded-full" />
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-primary/3 blur-[150px] rounded-full" />
       </div>
       
       {/* Sidebar - Desktop */}
-      <aside className="hidden md:flex w-64 flex-col border-r border-border bg-card/50 backdrop-blur-md fixed h-full z-30">
+      <aside className="hidden md:flex w-64 flex-col border-r border-border bg-sidebar-background backdrop-blur-md fixed h-full z-30">
         <div className="h-16 flex items-center gap-2 px-6 border-b border-border">
           <Logo href="/" size="sm" />
         </div>
@@ -255,7 +252,7 @@ export default function DashboardLayout({
                     "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group",
                     isActive
                       ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                   )}
                 >
                   <item.icon className={cn("w-5 h-5 transition-colors", isActive ? "text-primary" : "group-hover:text-primary")} />
@@ -271,7 +268,7 @@ export default function DashboardLayout({
                 defaultOpen={category.defaultOpen || hasActiveItem}
                 className="space-y-1"
               >
-                <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all">
+                <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all">
                   <div className="flex items-center gap-2">
                     <category.icon className="w-4 h-4" />
                     <span>{category.name}</span>
@@ -289,7 +286,7 @@ export default function DashboardLayout({
                           "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group",
                           isActive
                             ? "bg-primary/10 text-primary"
-                            : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                         )}
                       >
                         <item.icon className={cn("w-4 h-4 transition-colors", isActive ? "text-primary" : "group-hover:text-primary")} />
@@ -307,7 +304,7 @@ export default function DashboardLayout({
           {/* Finance Group Selector */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="w-full p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-primary/30 transition-all text-left group">
+              <button className="w-full p-3 rounded-xl bg-muted/50 border border-border hover:bg-muted hover:border-primary/30 transition-all text-left group">
                 {activeGroup ? (
                   <div className="flex items-center gap-3">
                     <div className={cn(
@@ -410,7 +407,7 @@ export default function DashboardLayout({
               <input 
                 type="text" 
                 placeholder="Search transactions..." 
-                className="w-full h-9 pl-10 pr-4 rounded-lg bg-white/5 border border-white/10 focus:outline-none focus:border-primary/50 focus:bg-white/10 text-sm transition-all placeholder:text-muted-foreground/50"
+                className="w-full h-9 pl-10 pr-4 rounded-lg bg-muted/50 border border-border focus:outline-none focus:border-primary/50 focus:bg-muted text-sm transition-all placeholder:text-muted-foreground/70"
               />
             </div>
           </div>

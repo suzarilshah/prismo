@@ -87,12 +87,32 @@ export default function SettingsPage() {
 
   const handleSave = async () => {
     try {
+      if (!user?.id) {
+        toast.error("User not found", {
+          description: "Please refresh the page and try again.",
+        });
+        return;
+      }
+
       const res = await fetch("/api/user-settings", {
-        method: "POST",
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(settings),
+        body: JSON.stringify({
+          ...settings,
+          userId: user.id,
+        }),
       });
-      if (!res.ok) throw new Error("Failed to save settings");
+      
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to save settings");
+      }
+
+      // Apply theme immediately
+      if (settings.theme !== currentTheme) {
+        setTheme(settings.theme);
+      }
+
       toast.success("Settings Saved", {
         description: "Your preferences have been updated.",
       });

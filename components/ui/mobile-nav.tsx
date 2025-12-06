@@ -172,7 +172,7 @@ export function MobileBottomNav({ onAddClick, onSignOut, userName }: MobileNavPr
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
+              className="md:hidden fixed inset-0 bg-background/60 backdrop-blur-sm z-[60]"
               onClick={() => setIsAddMenuOpen(false)}
             />
             <motion.div
@@ -224,7 +224,7 @@ export function MobileBottomNav({ onAddClick, onSignOut, userName }: MobileNavPr
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
+              className="md:hidden fixed inset-0 bg-background/60 backdrop-blur-sm z-[60]"
               onClick={() => setIsMoreOpen(false)}
             />
             <motion.div

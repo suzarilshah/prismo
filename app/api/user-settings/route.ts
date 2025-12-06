@@ -51,6 +51,11 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// POST /api/user-settings - Create or update user settings (for compatibility)
+export async function POST(request: NextRequest) {
+  return PUT(request);
+}
+
 // PUT /api/user-settings - Update user settings
 export async function PUT(request: NextRequest) {
   try {
