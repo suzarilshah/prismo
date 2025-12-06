@@ -132,7 +132,7 @@ const features = [
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#030303] text-white overflow-x-hidden selection:bg-blue-500/30">
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-primary/30">
       {/* Ambient Background */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[600px] bg-gradient-to-b from-blue-600/20 via-purple-600/10 to-transparent blur-[120px] opacity-60" />
@@ -140,10 +140,7 @@ export default function LandingPage() {
       </div>
 
       {/* Grid Pattern */}
-      <div className="fixed inset-0 pointer-events-none opacity-[0.03]" style={{
-        backgroundSize: '60px 60px',
-        backgroundImage: 'linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)'
-      }} />
+      <div className="fixed inset-0 pointer-events-none grid-pattern" />
 
       {/* Navigation */}
       <motion.nav 
@@ -153,23 +150,23 @@ export default function LandingPage() {
         className="fixed top-0 w-full z-50 px-6 py-4"
       >
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between px-6 py-3 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.05]">
+          <div className="flex items-center justify-between px-6 py-3 rounded-2xl bg-card/50 backdrop-blur-xl border border-border">
             <Logo href="/" size="sm" />
             
             <div className="hidden md:flex items-center gap-8">
-              <Link href="#features" className="text-sm text-white/60 hover:text-white transition-colors">Features</Link>
-              <Link href="#pricing" className="text-sm text-white/60 hover:text-white transition-colors">Pricing</Link>
-              <Link href="#about" className="text-sm text-white/60 hover:text-white transition-colors">About</Link>
+              <Link href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Features</Link>
+              <Link href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</Link>
+              <Link href="#about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">About</Link>
             </div>
 
             <div className="flex items-center gap-3">
               <Link href="/dashboard">
-                <Button variant="ghost" className="text-white/70 hover:text-white hover:bg-white/5">
+                <Button variant="ghost" className="text-muted-foreground hover:text-foreground hover:bg-muted/50">
                   Sign In
                 </Button>
               </Link>
               <Link href="/dashboard">
-                <Button className="bg-white text-black hover:bg-white/90 font-semibold rounded-xl px-5">
+                <Button className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold rounded-xl px-5">
                   Get Started
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
@@ -199,7 +196,7 @@ export default function LandingPage() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500" />
               </span>
-              <span className="text-white/70">Backed by <span className="text-orange-400 font-semibold">Y Combinator</span></span>
+              <span className="text-muted-foreground">Backed by <span className="text-orange-400 font-semibold">Y Combinator</span></span>
               <span className="px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 text-xs font-bold">W24</span>
             </motion.div>
             
@@ -212,7 +209,7 @@ export default function LandingPage() {
             </motion.h1>
             
             {/* Subheadline */}
-            <motion.p variants={fadeInUp} className="text-lg md:text-xl text-white/50 max-w-2xl mx-auto leading-relaxed">
+            <motion.p variants={fadeInUp} className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               The intelligent finance platform for modern Malaysians. 
               Track expenses, optimize taxes, and build wealth — all in one place.
             </motion.p>

@@ -220,7 +220,7 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen bg-background text-foreground flex relative">
       {/* Grid Background Pattern */}
-      <div className="fixed inset-0 opacity-[0.02] dark:opacity-[0.02] pointer-events-none bg-grid-pattern" />
+      <div className="fixed inset-0 pointer-events-none grid-pattern" />
       
       {/* Ambient Background Gradients */}
       <div className="fixed inset-0 pointer-events-none">
