@@ -10,20 +10,12 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Ignore ESLint warnings during production builds (they don't block functionality)
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  // Ignore TypeScript errors during builds (use type-check in CI instead)
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   experimental: {
     serverActions: {
       bodySizeLimit: "10mb",
     },
   },
-  // Empty turbopack config to use Turbopack (Next.js 16 default)
+  // Use Turbopack (Next.js 16 default)
   turbopack: {},
 };
 
