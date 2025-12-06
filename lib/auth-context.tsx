@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 interface User {
@@ -33,6 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const hasInitialized = useRef(false);
 
   // Sync Stack Auth user with our database
   const syncUser = useCallback(async (): Promise<User | null> => {
@@ -68,23 +69,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (syncResponse.ok) {
         const data = await syncResponse.json();
-        if (data.success && !data.data.needsSync) {
+        if (data.success && data.data && !data.data.needsSync) {
           setUser(data.data);
           
-          // Redirect to onboarding if needed
-          if (data.data.needsOnboarding && window.location.pathname !== "/onboarding") {
+          // Redirect to onboarding if needed (only on client)
+          if (typeof window !== "undefined" && data.data.needsOnboarding && window.location.pathname !== "/onboarding") {
             router.push("/onboarding");
           }
+          setIsLoading(false);
           return;
-        } else if (data.success && data.data.needsSync) {
+        } else if (data.success && data.data && data.data.needsSync) {
           // User exists in Stack Auth but not in our DB - sync them
           const syncedUser = await syncUser();
           if (syncedUser) {
             setUser(syncedUser);
-            if (syncedUser.needsOnboarding && window.location.pathname !== "/onboarding") {
+            if (typeof window !== "undefined" && syncedUser.needsOnboarding && window.location.pathname !== "/onboarding") {
               router.push("/onboarding");
             }
           }
+          setIsLoading(false);
           return;
         }
       }
@@ -108,8 +111,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [syncUser, router]);
 
-  // Initial auth check
+  // Initial auth check - only run once
   useEffect(() => {
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
     refreshUser();
   }, [refreshUser]);
 
