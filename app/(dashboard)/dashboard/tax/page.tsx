@@ -11,17 +11,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { LoadingSpinner } from "@/components/loading-spinner";
+import { motion } from "framer-motion";
 import { 
   FileText, Plus, Receipt, Calculator, TrendingUp, Upload, Trash2, 
   CheckCircle2, AlertTriangle, ChevronLeft, ChevronRight, PieChart, BarChart3, 
-  FileCheck, Camera, Image, X, Eye, Download, DollarSign, Target, Clock,
-  TrendingDown, Wallet, CalendarDays, Users, Loader2
+  FileCheck, Camera, Image, X, Eye, DollarSign, Target, Clock,
+  TrendingDown, Wallet, CalendarDays, Loader2, Sparkles, Shield, Building2,
+  ArrowUpRight, ArrowDownRight, Banknote, BadgePercent, FileStack, Landmark
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 // Types
 interface TaxDeduction {
@@ -513,47 +515,81 @@ export default function TaxPage() {
   
   // Calculate totals
   const totalClaimable = taxData?.deductions?.totalClaimable || 0;
-  const taxSavings = (taxData?.tax?.grossTax || 0) - (taxData?.tax?.netTaxPayable || 0);
+  const totalReliefs = taxData?.deductions?.totalReliefs || 0;
+  const grossIncome = taxData?.income?.gross || 0;
+  const chargeableIncome = taxData?.tax?.chargeableIncome || 0;
+  const grossTax = taxData?.tax?.grossTax || 0;
+  const netTaxPayable = taxData?.tax?.netTaxPayable || 0;
+  const taxSavings = grossTax - netTaxPayable;
+  const effectiveRate = taxData?.tax?.effectiveRate || 0;
+  const totalPcbPaid = taxData?.pcb?.totalPaid || 0;
   const refundOrOwed = taxData?.result || { refund: 0, owed: 0, status: "balanced" };
+  const categoriesUsed = categories.filter((c: CategoryBreakdown) => c.userTotal > 0).length;
+  const totalCategories = categories.length;
+
+  // Animation variants
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
+  };
 
   return (
-    <div className="space-y-6 animate-fade-in-up">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="font-display font-semibold text-3xl tracking-tight">Tax Management</h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            LHDN Year of Assessment {selectedYear}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center bg-muted/50 rounded-lg p-1">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => setSelectedYear(y => y - 1)} 
-              className="h-8 w-8 p-0"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-            <span className="px-4 font-semibold">{selectedYear}</span>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => setSelectedYear(y => Math.min(y + 1, currentYear))} 
-              disabled={selectedYear >= currentYear} 
-              className="h-8 w-8 p-0"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
+    <div className="space-y-8">
+      {/* Premium Header */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600/20 via-purple-600/10 to-pink-600/10 border border-violet-500/20 p-8">
+        <div className="absolute inset-0 bg-grid-white/5 [mask-image:linear-gradient(0deg,transparent,black)]" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl" />
+        
+        <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-xl bg-violet-500/20">
+                <Landmark className="w-6 h-6 text-violet-400" />
+              </div>
+              <Badge variant="outline" className="border-violet-500/30 text-violet-400 bg-violet-500/10">
+                LHDN YA {selectedYear}
+              </Badge>
+            </div>
+            <h1 className="font-display font-bold text-4xl tracking-tight mb-2">
+              Tax Management
+            </h1>
+            <p className="text-muted-foreground max-w-md">
+              Track deductions, calculate taxes, and maximize your reliefs for Year of Assessment {selectedYear}
+            </p>
           </div>
           
-          <Dialog open={isAddDialogOpen} onOpenChange={(open) => { setIsAddDialogOpen(open); if (!open) resetForm(); }}>
-            <DialogTrigger asChild>
-              <Button className="gap-2">
-                <Plus className="w-4 h-4" /> Add Deduction
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            {/* Year Selector */}
+            <div className="flex items-center bg-background/50 backdrop-blur-sm rounded-xl border border-white/10 p-1">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setSelectedYear(y => y - 1)} 
+                className="h-10 w-10 p-0 hover:bg-white/10"
+              >
+                <ChevronLeft className="w-4 h-4" />
               </Button>
-            </DialogTrigger>
+              <div className="px-6 py-2 text-center min-w-[100px]">
+                <p className="text-xs text-muted-foreground">Year</p>
+                <p className="font-bold text-lg">{selectedYear}</p>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setSelectedYear(y => Math.min(y + 1, currentYear))} 
+                disabled={selectedYear >= currentYear} 
+                className="h-10 w-10 p-0 hover:bg-white/10"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            <Dialog open={isAddDialogOpen} onOpenChange={(open) => { setIsAddDialogOpen(open); if (!open) resetForm(); }}>
+              <DialogTrigger asChild>
+                <Button size="lg" className="gap-2 bg-violet-600 hover:bg-violet-700 text-white shadow-lg shadow-violet-500/25">
+                  <Plus className="w-4 h-4" /> Add Deduction
+                </Button>
+              </DialogTrigger>
             <DialogContent className="bg-card border-border max-w-lg max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle className="font-display">Add Tax Deduction</DialogTitle>
@@ -690,165 +726,288 @@ export default function TaxPage() {
           </Dialog>
         </div>
       </div>
+      </div>
 
-      {/* Tax Refund/Owed Status Card */}
-      {refundOrOwed.status !== "balanced" && (
-        <Card className={`data-card p-6 border-2 ${
+      {/* Tax Status Hero Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+      >
+        <Card className={cn(
+          "relative overflow-hidden border-2 p-6",
           refundOrOwed.status === "refund" 
-            ? "border-emerald-500/30 bg-emerald-500/5" 
-            : "border-amber-500/30 bg-amber-500/5"
-        }`}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              {refundOrOwed.status === "refund" ? (
-                <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                  <TrendingDown className="w-6 h-6 text-emerald-500" />
+            ? "border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent" 
+            : refundOrOwed.status === "owed"
+            ? "border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent"
+            : "border-blue-500/30 bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent"
+        )}>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-white/5 to-transparent rounded-full blur-3xl" />
+          
+          <div className="relative z-10 grid md:grid-cols-3 gap-6">
+            {/* Main Status */}
+            <div className="md:col-span-1">
+              <div className="flex items-center gap-3 mb-4">
+                <div className={cn(
+                  "w-14 h-14 rounded-2xl flex items-center justify-center",
+                  refundOrOwed.status === "refund" ? "bg-emerald-500/20" : refundOrOwed.status === "owed" ? "bg-amber-500/20" : "bg-blue-500/20"
+                )}>
+                  {refundOrOwed.status === "refund" ? (
+                    <ArrowDownRight className="w-7 h-7 text-emerald-500" />
+                  ) : refundOrOwed.status === "owed" ? (
+                    <ArrowUpRight className="w-7 h-7 text-amber-500" />
+                  ) : (
+                    <CheckCircle2 className="w-7 h-7 text-blue-500" />
+                  )}
                 </div>
-              ) : (
-                <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-amber-500" />
+                <div>
+                  <p className="text-sm text-muted-foreground">
+                    {refundOrOwed.status === "refund" ? "Estimated Refund" : refundOrOwed.status === "owed" ? "Estimated Tax Due" : "Tax Status"}
+                  </p>
+                  <p className={cn(
+                    "font-display font-bold text-3xl",
+                    refundOrOwed.status === "refund" ? "text-emerald-500" : refundOrOwed.status === "owed" ? "text-amber-500" : "text-blue-500"
+                  )}>
+                    {refundOrOwed.status === "balanced" ? "Balanced" : formatCurrency(refundOrOwed.status === "refund" ? refundOrOwed.refund : refundOrOwed.owed)}
+                  </p>
                 </div>
-              )}
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  {refundOrOwed.status === "refund" ? "Estimated Tax Refund" : "Estimated Tax Payable"}
-                </p>
-                <p className={`font-display font-bold text-3xl ${
-                  refundOrOwed.status === "refund" ? "text-emerald-500" : "text-amber-500"
-                }`}>
-                  {formatCurrency(refundOrOwed.status === "refund" ? refundOrOwed.refund : refundOrOwed.owed)}
-                </p>
               </div>
             </div>
-            <div className="text-right text-sm text-muted-foreground">
-              <p>PCB Paid: {formatCurrency(taxData?.pcb?.totalPaid || 0)}</p>
-              <p>Tax Payable: {formatCurrency(taxData?.tax?.netTaxPayable || 0)}</p>
+
+            {/* Key Metrics */}
+            <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="p-3 rounded-xl bg-background/50 backdrop-blur-sm">
+                <p className="text-xs text-muted-foreground mb-1">Gross Income</p>
+                <p className="font-bold text-lg">{formatCurrency(grossIncome)}</p>
+              </div>
+              <div className="p-3 rounded-xl bg-background/50 backdrop-blur-sm">
+                <p className="text-xs text-muted-foreground mb-1">PCB Paid (YTD)</p>
+                <p className="font-bold text-lg">{formatCurrency(totalPcbPaid)}</p>
+              </div>
+              <div className="p-3 rounded-xl bg-background/50 backdrop-blur-sm">
+                <p className="text-xs text-muted-foreground mb-1">Net Tax Payable</p>
+                <p className="font-bold text-lg">{formatCurrency(netTaxPayable)}</p>
+              </div>
+              <div className="p-3 rounded-xl bg-background/50 backdrop-blur-sm">
+                <p className="text-xs text-muted-foreground mb-1">Effective Rate</p>
+                <p className="font-bold text-lg">{effectiveRate.toFixed(1)}%</p>
+              </div>
             </div>
           </div>
         </Card>
-      )}
+      </motion.div>
 
-      <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="bg-muted/50 flex-wrap">
-          <TabsTrigger value="overview" className="gap-2">
-            <PieChart className="w-4 h-4" />Overview
+      {/* Summary Metric Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+          <Card className="p-6 bg-gradient-to-br from-violet-500/10 to-purple-500/5 border-violet-500/20 hover:border-violet-500/40 transition-colors">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Total Deductions</p>
+                <p className="font-display font-bold text-2xl md:text-3xl mt-2 text-violet-400">
+                  {formatCurrency(totalClaimable)}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">{deductions.length} items recorded</p>
+              </div>
+              <div className="p-3 rounded-xl bg-violet-500/10">
+                <Receipt className="w-5 h-5 text-violet-400" />
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+          <Card className="p-6 bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border-emerald-500/20 hover:border-emerald-500/40 transition-colors">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Tax Savings</p>
+                <p className="font-display font-bold text-2xl md:text-3xl mt-2 text-emerald-400">
+                  {formatCurrency(Math.max(0, taxSavings))}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">From claimed reliefs</p>
+              </div>
+              <div className="p-3 rounded-xl bg-emerald-500/10">
+                <Sparkles className="w-5 h-5 text-emerald-400" />
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+          <Card className="p-6 bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border-blue-500/20 hover:border-blue-500/40 transition-colors">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Categories Used</p>
+                <p className="font-display font-bold text-2xl md:text-3xl mt-2">
+                  <span className="text-blue-400">{categoriesUsed}</span>
+                  <span className="text-muted-foreground text-lg">/{totalCategories}</span>
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">Relief categories</p>
+              </div>
+              <div className="p-3 rounded-xl bg-blue-500/10">
+                <Target className="w-5 h-5 text-blue-400" />
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+          <Card className="p-6 bg-gradient-to-br from-orange-500/10 to-amber-500/5 border-orange-500/20 hover:border-orange-500/40 transition-colors">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Chargeable Income</p>
+                <p className="font-display font-bold text-2xl md:text-3xl mt-2">
+                  {formatCurrency(chargeableIncome)}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">After reliefs</p>
+              </div>
+              <div className="p-3 rounded-xl bg-orange-500/10">
+                <Banknote className="w-5 h-5 text-orange-400" />
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+      </div>
+
+      {/* Main Content Tabs */}
+      <Tabs defaultValue="categories" className="space-y-6">
+        <TabsList className="bg-muted/30 backdrop-blur-sm p-1 rounded-xl border border-white/5 flex-wrap h-auto">
+          <TabsTrigger value="categories" className="gap-2 rounded-lg data-[state=active]:bg-violet-500/20 data-[state=active]:text-violet-400">
+            <PieChart className="w-4 h-4" />Relief Categories
           </TabsTrigger>
-          <TabsTrigger value="calculator" className="gap-2">
+          <TabsTrigger value="calculator" className="gap-2 rounded-lg data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400">
             <Calculator className="w-4 h-4" />Tax Calculator
           </TabsTrigger>
-          <TabsTrigger value="bookkeeping" className="gap-2">
-            <FileCheck className="w-4 h-4" />Bookkeeping
+          <TabsTrigger value="records" className="gap-2 rounded-lg data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400">
+            <FileStack className="w-4 h-4" />Deduction Records
           </TabsTrigger>
-          <TabsTrigger value="pcb" className="gap-2">
+          <TabsTrigger value="pcb" className="gap-2 rounded-lg data-[state=active]:bg-orange-500/20 data-[state=active]:text-orange-400">
             <CalendarDays className="w-4 h-4" />Monthly PCB
           </TabsTrigger>
         </TabsList>
 
-        {/* Overview Tab */}
-        <TabsContent value="overview" className="space-y-6">
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card className="data-card p-6">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Receipt className="w-5 h-5 text-primary" />
+        {/* Relief Categories Tab */}
+        <TabsContent value="categories" className="space-y-6">
+          <Card className="border-0 shadow-none bg-transparent">
+            <CardHeader className="px-0">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-xl font-bold">LHDN Relief Categories</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">Track your tax relief claims against LHDN limits</p>
                 </div>
-                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Total Deductions
-                </div>
+                <Badge variant="outline" className="border-violet-500/30 text-violet-400">
+                  {categoriesUsed} of {totalCategories} used
+                </Badge>
               </div>
-              <div className="font-display font-bold text-3xl text-primary">
-                {formatCurrency(totalClaimable)}
-              </div>
-            </Card>
-            
-            <Card className="data-card p-6">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                  <DollarSign className="w-5 h-5 text-emerald-500" />
-                </div>
-                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Tax Savings
-                </div>
-              </div>
-              <div className="font-display font-bold text-3xl text-emerald-500">
-                {formatCurrency(taxSavings)}
-              </div>
-            </Card>
-            
-            <Card className="data-card p-6">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-blue-500" />
-                </div>
-                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Deduction Items
-                </div>
-              </div>
-              <div className="font-display font-bold text-3xl">
-                {deductions.length}
-              </div>
-            </Card>
-            
-            <Card className="data-card p-6">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-violet-500/10 flex items-center justify-center">
-                  <Target className="w-5 h-5 text-violet-500" />
-                </div>
-                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Categories Used
-                </div>
-              </div>
-              <div className="font-display font-bold text-3xl">
-                {categories.filter((c: CategoryBreakdown) => c.userTotal > 0).length}
-              </div>
-            </Card>
-          </div>
-
-          {/* Category Breakdown */}
-          <Card className="data-card">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold">LHDN Relief Categories</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {categories
+            <CardContent className="px-0 space-y-3">
+              {/* Categories with activity first, then empty ones */}
+              {[...categories]
+                .sort((a: CategoryBreakdown, b: CategoryBreakdown) => (b.userTotal || 0) - (a.userTotal || 0))
                 .filter((cat: CategoryBreakdown) => cat.limit !== null)
-                .map((cat: CategoryBreakdown) => (
-                  <div 
-                    key={cat.code} 
-                    className="p-4 rounded-lg border border-border hover:border-primary/30 transition-colors"
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <h3 className="font-semibold">{cat.name}</h3>
-                        <p className="text-xs text-muted-foreground">
-                          Limit: {formatCurrency(cat.limit!)}
-                          {cat.itemCount > 0 && ` • ${cat.itemCount} item${cat.itemCount > 1 ? "s" : ""}`}
-                        </p>
+                .map((cat: CategoryBreakdown, index: number) => {
+                  const hasActivity = cat.userTotal > 0;
+                  const isMaxed = cat.percentage >= 100;
+                  
+                  return (
+                    <motion.div
+                      key={cat.code}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.03 }}
+                      className={cn(
+                        "p-5 rounded-2xl border transition-all duration-300 group",
+                        hasActivity 
+                          ? "bg-gradient-to-r from-violet-500/5 to-transparent border-violet-500/20 hover:border-violet-500/40" 
+                          : "bg-card/50 border-border/50 hover:border-border"
+                      )}
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className={cn(
+                            "w-10 h-10 rounded-xl flex items-center justify-center transition-colors",
+                            hasActivity ? "bg-violet-500/20" : "bg-muted"
+                          )}>
+                            {isMaxed ? (
+                              <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                            ) : hasActivity ? (
+                              <BadgePercent className="w-5 h-5 text-violet-400" />
+                            ) : (
+                              <Target className="w-5 h-5 text-muted-foreground" />
+                            )}
+                          </div>
+                          <div>
+                            <h3 className={cn(
+                              "font-semibold",
+                              hasActivity ? "text-foreground" : "text-muted-foreground"
+                            )}>
+                              {cat.name}
+                            </h3>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <span>Max: {formatCurrency(cat.limit!)}</span>
+                              {cat.itemCount > 0 && (
+                                <>
+                                  <span>•</span>
+                                  <span>{cat.itemCount} item{cat.itemCount > 1 ? "s" : ""}</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className={cn(
+                            "font-display font-bold text-xl",
+                            hasActivity ? (isMaxed ? "text-emerald-400" : "text-violet-400") : "text-muted-foreground"
+                          )}>
+                            {formatCurrency(cat.claimable)}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {cat.remaining !== null && cat.remaining > 0 
+                              ? `${formatCurrency(cat.remaining)} remaining` 
+                              : isMaxed 
+                              ? "Limit reached" 
+                              : "Not claimed"}
+                          </p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-display font-bold text-xl">
-                          {formatCurrency(cat.claimable)}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {cat.remaining !== null ? `${formatCurrency(cat.remaining)} left` : ""}
-                        </p>
+                      
+                      {/* Progress Bar */}
+                      <div className="relative">
+                        <div className="h-2 bg-muted rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${Math.min(cat.percentage, 100)}%` }}
+                            transition={{ duration: 0.5, delay: index * 0.03 }}
+                            className={cn(
+                              "h-full rounded-full",
+                              isMaxed 
+                                ? "bg-gradient-to-r from-emerald-500 to-emerald-400" 
+                                : hasActivity 
+                                ? "bg-gradient-to-r from-violet-500 to-purple-400" 
+                                : "bg-muted-foreground/20"
+                            )}
+                          />
+                        </div>
+                        <span className="absolute right-0 top-3 text-xs text-muted-foreground">
+                          {cat.percentage.toFixed(0)}%
+                        </span>
                       </div>
-                    </div>
-                    <Progress value={Math.min(cat.percentage, 100)} className="h-2" />
-                    {cat.percentage > 100 && (
-                      <p className="text-xs text-amber-500 mt-2 flex items-center gap-1">
-                        <AlertTriangle className="w-3 h-3" />
-                        Exceeded limit - only {formatCurrency(cat.limit!)} claimable
-                      </p>
-                    )}
-                  </div>
-                ))}
+
+                      {cat.percentage > 100 && (
+                        <p className="text-xs text-amber-500 mt-3 flex items-center gap-1">
+                          <AlertTriangle className="w-3 h-3" />
+                          Exceeded limit by {formatCurrency(cat.userTotal - (cat.limit || 0))} - only {formatCurrency(cat.limit!)} claimable
+                        </p>
+                      )}
+                    </motion.div>
+                  );
+                })}
               
               {categories.filter((c: CategoryBreakdown) => c.limit !== null).length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Target className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                  <p>No categories with limits found</p>
+                <div className="text-center py-16 text-muted-foreground">
+                  <Target className="w-16 h-16 mx-auto mb-4 opacity-20" />
+                  <p className="text-lg font-medium">No relief categories available</p>
+                  <p className="text-sm">Categories will appear once configured</p>
                 </div>
               )}
             </CardContent>
@@ -857,106 +1016,138 @@ export default function TaxPage() {
 
         {/* Tax Calculator Tab */}
         <TabsContent value="calculator" className="space-y-6">
-          <Card className="data-card p-6">
-            <h3 className="font-semibold text-lg mb-4">Tax Calculator (YA {selectedYear})</h3>
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Annual Chargeable Income (MYR)</Label>
-                  <Input 
-                    type="number" 
-                    value={annualIncome} 
-                    onChange={(e) => setAnnualIncome(parseFloat(e.target.value) || 0)} 
-                    className="text-lg font-mono" 
-                  />
+          <Card className="relative overflow-hidden border-emerald-500/20 bg-gradient-to-br from-emerald-500/5 to-transparent">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl" />
+            <CardHeader>
+              <CardTitle className="text-xl font-bold flex items-center gap-2">
+                <Calculator className="w-5 h-5 text-emerald-400" />
+                Tax Calculator YA {selectedYear}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 gap-8 relative z-10">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Annual Gross Income (MYR)</Label>
+                    <Input 
+                      type="number" 
+                      value={annualIncome} 
+                      onChange={(e) => setAnnualIncome(parseFloat(e.target.value) || 0)} 
+                      className="text-lg font-mono h-12 bg-background/50" 
+                    />
+                  </div>
+                  <div className="p-5 rounded-2xl bg-violet-500/10 border border-violet-500/20 space-y-2">
+                    <p className="text-sm text-muted-foreground">Total Relief Claimed</p>
+                    <p className="font-display font-bold text-3xl text-violet-400">
+                      {formatCurrency(totalClaimable)}
+                    </p>
+                  </div>
+                  <div className="p-5 rounded-2xl bg-background/50 border border-border space-y-2">
+                    <p className="text-sm text-muted-foreground">Chargeable Income</p>
+                    <p className="font-display font-bold text-3xl">
+                      {formatCurrency(Math.max(0, annualIncome - totalClaimable))}
+                    </p>
+                  </div>
                 </div>
-                <div className="p-4 rounded-lg bg-muted/50 space-y-2">
-                  <p className="text-sm text-muted-foreground">Total Relief Claimed</p>
-                  <p className="font-display font-bold text-2xl text-primary">
-                    {formatCurrency(totalClaimable)}
-                  </p>
-                </div>
-                <div className="p-4 rounded-lg bg-muted/50 space-y-2">
-                  <p className="text-sm text-muted-foreground">Chargeable Income</p>
-                  <p className="font-display font-bold text-2xl">
-                    {formatCurrency(Math.max(0, annualIncome - totalClaimable))}
-                  </p>
-                </div>
-              </div>
-              <div className="space-y-4">
-                <div className="p-4 rounded-lg border border-red-500/20 bg-red-500/5">
-                  <p className="text-sm text-muted-foreground mb-1">Tax Without Relief</p>
-                  <p className="font-display font-bold text-2xl text-red-500">
-                    {formatCurrency(taxData?.tax?.grossTax || 0)}
-                  </p>
-                </div>
-                <div className="p-4 rounded-lg border border-emerald-500/20 bg-emerald-500/5">
-                  <p className="text-sm text-muted-foreground mb-1">Tax With Relief</p>
-                  <p className="font-display font-bold text-2xl text-emerald-500">
-                    {formatCurrency(taxData?.tax?.netTaxPayable || 0)}
-                  </p>
-                </div>
-                <div className="p-4 rounded-lg border border-primary/20 bg-primary/5">
-                  <p className="text-sm text-muted-foreground mb-1">You Save</p>
-                  <p className="font-display font-bold text-3xl text-primary">
-                    {formatCurrency(taxSavings)}
-                  </p>
-                </div>
-                {taxData?.tax?.effectiveRate && (
+                <div className="space-y-4">
+                  <div className="p-5 rounded-2xl border border-red-500/20 bg-red-500/10">
+                    <div className="flex items-center gap-2 mb-2">
+                      <TrendingUp className="w-4 h-4 text-red-400" />
+                      <p className="text-sm text-muted-foreground">Tax Without Relief</p>
+                    </div>
+                    <p className="font-display font-bold text-3xl text-red-400">
+                      {formatCurrency(grossTax)}
+                    </p>
+                  </div>
+                  <div className="p-5 rounded-2xl border border-emerald-500/20 bg-emerald-500/10">
+                    <div className="flex items-center gap-2 mb-2">
+                      <TrendingDown className="w-4 h-4 text-emerald-400" />
+                      <p className="text-sm text-muted-foreground">Tax With Relief</p>
+                    </div>
+                    <p className="font-display font-bold text-3xl text-emerald-400">
+                      {formatCurrency(netTaxPayable)}
+                    </p>
+                  </div>
+                  <div className="p-5 rounded-2xl border-2 border-emerald-500/40 bg-gradient-to-br from-emerald-500/20 to-emerald-500/5">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Sparkles className="w-4 h-4 text-emerald-400" />
+                      <p className="text-sm font-medium text-emerald-400">Total Tax Savings</p>
+                    </div>
+                    <p className="font-display font-bold text-4xl text-emerald-400">
+                      {formatCurrency(Math.max(0, taxSavings))}
+                    </p>
+                  </div>
                   <p className="text-sm text-muted-foreground text-center">
-                    Effective Tax Rate: {taxData.tax.effectiveRate.toFixed(2)}%
+                    Effective Tax Rate: <span className="font-semibold text-foreground">{effectiveRate.toFixed(2)}%</span>
                   </p>
-                )}
+                </div>
               </div>
-            </div>
+            </CardContent>
           </Card>
         </TabsContent>
 
-        {/* Bookkeeping Tab */}
-        <TabsContent value="bookkeeping" className="space-y-6">
-          <Card className="data-card">
+        {/* Deduction Records Tab */}
+        <TabsContent value="records" className="space-y-6">
+          <Card className="border-blue-500/20">
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-lg font-semibold">Tax Deduction Records</CardTitle>
-              <Badge variant="outline">{deductions.length} items</Badge>
+              <div>
+                <CardTitle className="text-xl font-bold flex items-center gap-2">
+                  <FileStack className="w-5 h-5 text-blue-400" />
+                  Tax Deduction Records
+                </CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">All your recorded tax deductions for YA {selectedYear}</p>
+              </div>
+              <Badge variant="outline" className="border-blue-500/30 text-blue-400">
+                {deductions.length} items
+              </Badge>
             </CardHeader>
             <CardContent>
               {deductions.length === 0 ? (
-                <div className="text-center py-12">
-                  <FileText className="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
-                  <p className="text-muted-foreground">No deductions recorded yet</p>
+                <div className="text-center py-16">
+                  <div className="w-20 h-20 rounded-2xl bg-blue-500/10 flex items-center justify-center mx-auto mb-4">
+                    <FileText className="w-10 h-10 text-blue-400/50" />
+                  </div>
+                  <p className="text-lg font-medium mb-2">No deductions recorded yet</p>
+                  <p className="text-sm text-muted-foreground mb-6">Start tracking your tax-deductible expenses</p>
                   <Button 
-                    className="mt-4" 
                     onClick={() => setIsAddDialogOpen(true)}
+                    className="gap-2 bg-blue-600 hover:bg-blue-700"
                   >
-                    <Plus className="w-4 h-4 mr-2" />
+                    <Plus className="w-4 h-4" />
                     Add Your First Deduction
                   </Button>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {deductions.map((d: TaxDeduction) => (
-                    <div 
-                      key={d.id} 
-                      className="flex items-center justify-between p-4 rounded-lg border border-border hover:border-primary/30 transition-colors group"
+                  {deductions.map((d: TaxDeduction, index: number) => (
+                    <motion.div 
+                      key={d.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.03 }}
+                      className="flex items-center justify-between p-4 rounded-2xl border border-border bg-card/50 hover:border-blue-500/30 hover:bg-blue-500/5 transition-all group"
                     >
                       <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          d.verified ? "bg-emerald-500/10" : "bg-muted"
-                        }`}>
+                        <div className={cn(
+                          "w-12 h-12 rounded-xl flex items-center justify-center",
+                          d.verified ? "bg-emerald-500/10" : "bg-blue-500/10"
+                        )}>
                           {d.receiptUrl ? (
-                            <Image className="w-5 h-5 text-primary" />
+                            <Image className="w-5 h-5 text-blue-400" />
                           ) : d.verified ? (
                             <CheckCircle2 className="w-5 h-5 text-emerald-500" />
                           ) : (
-                            <Receipt className="w-5 h-5 text-muted-foreground" />
+                            <Receipt className="w-5 h-5 text-blue-400" />
                           )}
                         </div>
                         <div>
-                          <p className="font-medium">{d.description}</p>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <span>{d.lhdnCategory}</span>
+                          <p className="font-semibold">{d.description}</p>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                            <Badge variant="outline" className="text-xs py-0 h-5">
+                              {d.lhdnCategory || d.category}
+                            </Badge>
                             <span>•</span>
-                            <span>{new Date(d.dateIncurred).toLocaleDateString("en-MY")}</span>
+                            <span>{new Date(d.dateIncurred).toLocaleDateString("en-MY", { day: "numeric", month: "short", year: "numeric" })}</span>
                             {d.receiptUrl && (
                               <>
                                 <span>•</span>
@@ -964,9 +1155,9 @@ export default function TaxPage() {
                                   href={d.receiptUrl} 
                                   target="_blank" 
                                   rel="noopener noreferrer"
-                                  className="text-primary hover:underline"
+                                  className="text-blue-400 hover:underline flex items-center gap-1"
                                 >
-                                  View Receipt
+                                  <Eye className="w-3 h-3" /> Receipt
                                 </a>
                               </>
                             )}
@@ -974,19 +1165,19 @@ export default function TaxPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
-                        <p className="font-display font-semibold text-lg">
+                        <p className="font-display font-bold text-xl text-blue-400">
                           {formatCurrency(parseFloat(d.amount))}
                         </p>
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          className="opacity-0 group-hover:opacity-100" 
+                          className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500/10" 
                           onClick={() => setDeleteId(d.id)}
                         >
-                          <Trash2 className="w-4 h-4 text-destructive" />
+                          <Trash2 className="w-4 h-4 text-red-400" />
                         </Button>
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               )}
@@ -996,81 +1187,102 @@ export default function TaxPage() {
 
         {/* Monthly PCB Tab */}
         <TabsContent value="pcb" className="space-y-6">
-          <Card className="data-card p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="font-semibold text-lg">Monthly PCB Records</h3>
-                <p className="text-sm text-muted-foreground">Track your Potongan Cukai Bulanan (Monthly Tax Deduction)</p>
+          <Card className="relative overflow-hidden border-orange-500/20 bg-gradient-to-br from-orange-500/5 to-transparent">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-orange-500/5 rounded-full blur-3xl" />
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-xl font-bold flex items-center gap-2">
+                    <CalendarDays className="w-5 h-5 text-orange-400" />
+                    Monthly PCB Records
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">Track your Potongan Cukai Bulanan (Monthly Tax Deduction)</p>
+                </div>
+                <Badge variant="outline" className="border-orange-500/30 text-orange-400">
+                  {pcbData?.monthsRecorded || 0}/12 months
+                </Badge>
               </div>
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div className="p-4 rounded-lg bg-muted/50">
-                <p className="text-sm text-muted-foreground">Total PCB Paid</p>
-                <p className="font-display font-bold text-2xl">{formatCurrency(pcbData?.totals?.totalPcb || 0)}</p>
+            </CardHeader>
+            <CardContent className="relative z-10 space-y-6">
+              {/* PCB Summary Cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20">
+                  <p className="text-xs text-muted-foreground mb-1">Total PCB Paid</p>
+                  <p className="font-display font-bold text-2xl text-orange-400">{formatCurrency(pcbData?.totals?.totalPcb || 0)}</p>
+                </div>
+                <div className="p-4 rounded-2xl bg-background/50 border border-border">
+                  <p className="text-xs text-muted-foreground mb-1">Months Recorded</p>
+                  <p className="font-display font-bold text-2xl">
+                    <span className="text-orange-400">{pcbData?.monthsRecorded || 0}</span>
+                    <span className="text-muted-foreground">/12</span>
+                  </p>
+                </div>
+                <div className="p-4 rounded-2xl bg-background/50 border border-border">
+                  <p className="text-xs text-muted-foreground mb-1">Avg Monthly PCB</p>
+                  <p className="font-display font-bold text-2xl">
+                    {formatCurrency((pcbData?.totals?.totalPcb || 0) / Math.max(1, pcbData?.monthsRecorded || 1))}
+                  </p>
+                </div>
+                <div className="p-4 rounded-2xl bg-violet-500/10 border border-violet-500/20">
+                  <p className="text-xs text-muted-foreground mb-1">Total EPF</p>
+                  <p className="font-display font-bold text-2xl text-violet-400">{formatCurrency(pcbData?.totals?.totalEpf || 0)}</p>
+                </div>
               </div>
-              <div className="p-4 rounded-lg bg-muted/50">
-                <p className="text-sm text-muted-foreground">Months Recorded</p>
-                <p className="font-display font-bold text-2xl">{pcbData?.monthsRecorded || 0}/12</p>
-              </div>
-              <div className="p-4 rounded-lg bg-muted/50">
-                <p className="text-sm text-muted-foreground">Avg Monthly PCB</p>
-                <p className="font-display font-bold text-2xl">
-                  {formatCurrency((pcbData?.totals?.totalPcb || 0) / Math.max(1, pcbData?.monthsRecorded || 1))}
-                </p>
-              </div>
-              <div className="p-4 rounded-lg bg-muted/50">
-                <p className="text-sm text-muted-foreground">Total EPF</p>
-                <p className="font-display font-bold text-2xl">{formatCurrency(pcbData?.totals?.totalEpf || 0)}</p>
-              </div>
-            </div>
 
-            {/* Monthly Grid - Clickable */}
-            <p className="text-sm text-muted-foreground mb-3">Click on a month to add or edit PCB record</p>
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
-              {Array.from({ length: 12 }, (_, i) => {
-                const month = i + 1;
-                const monthName = new Date(selectedYear, i, 1).toLocaleDateString("en-MY", { month: "short" });
-                const isPast = selectedYear < currentYear || (selectedYear === currentYear && month <= new Date().getMonth() + 1);
-                const record = pcbData?.recordsByMonth?.[month];
-                const hasRecord = !!record;
-                
-                return (
-                  <div
-                    key={month}
-                    onClick={() => handlePcbMonthClick(month)}
-                    className={`p-4 rounded-lg border text-center cursor-pointer transition-all hover:scale-105 hover:shadow-lg ${
-                      hasRecord 
-                        ? "border-emerald-500/50 bg-emerald-500/5 hover:border-emerald-500" 
-                        : isPast 
-                          ? "border-amber-500/50 bg-amber-500/5 hover:border-amber-500" 
-                          : "border-border hover:border-primary/50"
-                    }`}
-                  >
-                    <p className="text-sm font-medium">{monthName}</p>
-                    <p className="text-xs text-muted-foreground">{selectedYear}</p>
-                    {hasRecord ? (
-                      <>
-                        <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto mt-2" />
-                        <p className="text-xs font-semibold text-emerald-500 mt-1">
-                          {formatCurrency(parseFloat(record.pcbAmount || "0"))}
-                        </p>
-                      </>
-                    ) : isPast ? (
-                      <>
-                        <AlertTriangle className="w-4 h-4 text-amber-500 mx-auto mt-2" />
-                        <p className="text-xs text-amber-500 mt-1">Missing</p>
-                      </>
-                    ) : (
-                      <>
-                        <Clock className="w-4 h-4 text-muted-foreground mx-auto mt-2" />
-                        <p className="text-xs text-muted-foreground mt-1">Upcoming</p>
-                      </>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+              {/* Monthly Grid - Clickable */}
+              <div>
+                <p className="text-sm text-muted-foreground mb-4">Click on a month to add or edit PCB record</p>
+                <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                  {Array.from({ length: 12 }, (_, i) => {
+                    const month = i + 1;
+                    const monthName = new Date(selectedYear, i, 1).toLocaleDateString("en-MY", { month: "short" });
+                    const monthFull = new Date(selectedYear, i, 1).toLocaleDateString("en-MY", { month: "long" });
+                    const isPast = selectedYear < currentYear || (selectedYear === currentYear && month <= new Date().getMonth() + 1);
+                    const record = pcbData?.recordsByMonth?.[month];
+                    const hasRecord = !!record;
+                    
+                    return (
+                      <motion.div
+                        key={month}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: i * 0.03 }}
+                        onClick={() => handlePcbMonthClick(month)}
+                        className={cn(
+                          "p-4 rounded-2xl border text-center cursor-pointer transition-all hover:scale-105 hover:shadow-lg",
+                          hasRecord 
+                            ? "border-emerald-500/50 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 hover:border-emerald-500" 
+                            : isPast 
+                            ? "border-amber-500/50 bg-gradient-to-br from-amber-500/10 to-amber-500/5 hover:border-amber-500" 
+                            : "border-border bg-card/50 hover:border-orange-500/50"
+                        )}
+                      >
+                        <p className="text-sm font-semibold">{monthName}</p>
+                        <p className="text-[10px] text-muted-foreground">{selectedYear}</p>
+                        {hasRecord ? (
+                          <>
+                            <CheckCircle2 className="w-5 h-5 text-emerald-500 mx-auto mt-2" />
+                            <p className="text-xs font-bold text-emerald-400 mt-1">
+                              {formatCurrency(parseFloat(record.pcbAmount || "0"))}
+                            </p>
+                          </>
+                        ) : isPast ? (
+                          <>
+                            <AlertTriangle className="w-5 h-5 text-amber-500 mx-auto mt-2" />
+                            <p className="text-xs text-amber-400 mt-1">Missing</p>
+                          </>
+                        ) : (
+                          <>
+                            <Clock className="w-5 h-5 text-muted-foreground mx-auto mt-2" />
+                            <p className="text-xs text-muted-foreground mt-1">Upcoming</p>
+                          </>
+                        )}
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </div>
+            </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
