@@ -371,7 +371,7 @@ export default function DashboardPage() {
                 <CircularProgress 
                   value={healthScore.score} 
                   max={100} 
-                  size={typeof window !== 'undefined' && window.innerWidth < 768 ? 120 : 160}
+                  size={160}
                   strokeWidth={12}
                   color={healthScore.score >= 75 ? "#10b981" : healthScore.score >= 50 ? "#f59e0b" : "#ef4444"}
                   showValue
@@ -496,7 +496,7 @@ export default function DashboardPage() {
         </Card>
       ),
     },
-  }), [overview, healthScore, formatCurrency]);
+  }), [overview, healthScore]);
 
   // Get sorted cards for a section
   const getSortedCardsForSection = useCallback((section: 'hero' | 'secondary' | 'tertiary' | 'quaternary') => {
@@ -672,7 +672,7 @@ export default function DashboardPage() {
                   <CircularProgress 
                     value={healthScore.score} 
                     max={100} 
-                    size={typeof window !== 'undefined' && window.innerWidth < 768 ? 120 : 160}
+                    size={160}
                     strokeWidth={12}
                     color={healthScore.score >= 75 ? "#10b981" : healthScore.score >= 50 ? "#f59e0b" : "#ef4444"}
                     showValue
