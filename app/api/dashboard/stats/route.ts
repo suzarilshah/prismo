@@ -379,12 +379,43 @@ export async function GET(request: NextRequest) {
       .limit(8);
 
     // ============================================
-    // TAX DEDUCTIONS
+    // TAX DEDUCTIONS - Enhanced with YoY and breakdown
     // ============================================
+    const currentYear = now.getFullYear();
+    const lastYear = currentYear - 1;
+
+    // Current year total (using claimable amount if available, otherwise amount)
     const [taxSummary] = await db
-      .select({ total: sum(taxDeductions.amount) })
+      .select({ 
+        total: sql<number>`COALESCE(SUM(CAST(COALESCE(claimable_amount, amount) AS DECIMAL)), 0)`,
+        count: count()
+      })
       .from(taxDeductions)
-      .where(and(eq(taxDeductions.userId, userId), eq(taxDeductions.year, now.getFullYear())));
+      .where(and(eq(taxDeductions.userId, userId), eq(taxDeductions.year, currentYear)));
+
+    // Last year total for comparison
+    const [lastYearTax] = await db
+      .select({ 
+        total: sql<number>`COALESCE(SUM(CAST(COALESCE(claimable_amount, amount) AS DECIMAL)), 0)` 
+      })
+      .from(taxDeductions)
+      .where(and(eq(taxDeductions.userId, userId), eq(taxDeductions.year, lastYear)));
+
+    // Top categories for current year
+    const taxBreakdown = await db
+      .select({
+        category: taxDeductions.lhdnCategory,
+        total: sql<number>`SUM(CAST(COALESCE(claimable_amount, amount) AS DECIMAL))`,
+      })
+      .from(taxDeductions)
+      .where(and(eq(taxDeductions.userId, userId), eq(taxDeductions.year, currentYear)))
+      .groupBy(taxDeductions.lhdnCategory)
+      .orderBy(desc(sql`SUM(CAST(COALESCE(claimable_amount, amount) AS DECIMAL))`))
+      .limit(5);
+
+    const currentYearTax = Number(taxSummary?.total || 0);
+    const previousYearTax = Number(lastYearTax?.total || 0);
+    const taxYoYChange = previousYearTax > 0 ? ((currentYearTax - previousYearTax) / previousYearTax) * 100 : 0;
 
     // ============================================
     // FINANCIAL HEALTH SCORE (0-100)
@@ -514,8 +545,16 @@ export async function GET(request: NextRequest) {
           category: item.category,
         })),
         taxDeductions: {
-          total: parseFloat(taxSummary?.total || "0"),
-          year: now.getFullYear(),
+          total: currentYearTax,
+          year: currentYear,
+          previousYear: previousYearTax,
+          previousYearLabel: lastYear,
+          yoyChange: taxYoYChange,
+          count: Number(taxSummary?.count || 0),
+          breakdown: taxBreakdown.map(item => ({
+            category: item.category || "Other",
+            total: Number(item.total || 0),
+          })),
         },
         healthScore: {
           score: healthScore,

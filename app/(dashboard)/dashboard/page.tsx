@@ -29,6 +29,7 @@ import { Button } from "@/components/ui/button";
 import { DashboardSkeleton } from "@/components/ui/skeleton-loaders";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
 import { AnimatedProgress, CircularProgress } from "@/components/ui/animated-progress";
+import { ExpenseDonutChart } from "@/components/charts";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -130,7 +131,15 @@ interface DashboardData {
     date: string;
     category?: { name: string; color: string };
   }>;
-  taxDeductions: { total: number; year: number };
+  taxDeductions: { 
+    total: number; 
+    year: number;
+    previousYear: number;
+    previousYearLabel: number;
+    yoyChange: number;
+    count: number;
+    breakdown: Array<{ category: string; total: number }>;
+  };
   healthScore: {
     score: number;
     factors: Array<{ name: string; score: number; status: 'good' | 'warning' | 'poor' }>;
@@ -653,46 +662,52 @@ export default function DashboardPage() {
           </Card>
         </motion.div>
 
-        {/* Top Spending */}
+        {/* Spending Breakdown with Donut Chart */}
         <motion.div variants={itemVariants} className="col-span-12 lg:col-span-4">
           <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-rose-500/10">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-rose-500/10 to-orange-500/10">
                   <Zap className="w-4 h-4 text-rose-500" />
                 </div>
-                <CardTitle className="text-base font-semibold">Top Spending</CardTitle>
+                <div>
+                  <CardTitle className="text-base font-semibold">Spending</CardTitle>
+                  <p className="text-xs text-muted-foreground">This month</p>
+                </div>
               </div>
-              <span className="text-xs text-muted-foreground">This month</span>
+              <Link href="/dashboard/transactions" className="text-xs text-primary hover:underline">Details</Link>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="p-4">
               {spendingByCategory.length > 0 ? (
-                spendingByCategory.slice(0, 5).map((cat, idx) => {
-                  const maxTotal = spendingByCategory[0]?.total || 1;
-                  const percentage = (cat.total / maxTotal) * 100;
-                  return (
-                    <div key={idx} className="flex items-center gap-3">
-                      <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: cat.categoryColor }} />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-sm font-medium truncate">{cat.categoryName}</span>
-                          <span className="text-sm font-semibold ml-2">{formatCurrency(cat.total)}</span>
-                        </div>
-                        <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                          <motion.div
-                            className="h-full rounded-full"
-                            style={{ backgroundColor: cat.categoryColor }}
-                            initial={{ width: 0 }}
-                            animate={{ width: `${percentage}%` }}
-                            transition={{ duration: 0.6, delay: idx * 0.1 }}
-                          />
-                        </div>
+                <div className="space-y-4">
+                  {/* Donut Chart */}
+                  <div className="h-[160px] -mx-2">
+                    <ExpenseDonutChart 
+                      data={spendingByCategory.slice(0, 6).map(cat => ({
+                        name: cat.categoryName,
+                        amount: cat.total,
+                      }))}
+                    />
+                  </div>
+                  
+                  {/* Legend with amounts */}
+                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border">
+                    {spendingByCategory.slice(0, 4).map((cat, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: cat.categoryColor }} />
+                        <span className="text-xs text-muted-foreground truncate">{cat.categoryName}</span>
                       </div>
-                    </div>
-                  );
-                })
+                    ))}
+                  </div>
+                  
+                  {/* Total */}
+                  <div className="flex items-center justify-between pt-2 border-t border-border">
+                    <span className="text-sm text-muted-foreground">Total</span>
+                    <span className="text-lg font-bold">{formatCurrency(spendingByCategory.reduce((sum, c) => sum + c.total, 0))}</span>
+                  </div>
+                </div>
               ) : (
-                <div className="text-center py-6 text-muted-foreground text-sm">
+                <div className="text-center py-8 text-muted-foreground text-sm">
                   No spending data
                 </div>
               )}
@@ -758,27 +773,58 @@ export default function DashboardPage() {
           </Card>
         </motion.div>
 
-        {/* Tax Deductions */}
+        {/* Tax Deductions - Enhanced */}
         <motion.div variants={itemVariants} className="col-span-12 lg:col-span-4">
-          <Card className="h-full bg-gradient-to-br from-indigo-500/5 to-purple-500/5 border-indigo-500/20">
-            <CardHeader className="pb-2 px-4 md:px-6">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm md:text-base font-semibold">Tax Relief YA {taxDeductions.year}</CardTitle>
-                <Sparkles className="w-4 h-4 text-indigo-500" />
+          <Card className="h-full bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-violet-500/5 border-indigo-500/20 overflow-hidden relative">
+            {/* Decorative gradient orbs */}
+            <div className="absolute -top-20 -right-20 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl" />
+            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl" />
+            
+            <CardContent className="p-4 md:p-6 relative z-10">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-indigo-500/10">
+                    <Receipt className="w-4 h-4 text-indigo-500" />
+                  </div>
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Tax Relief YA {taxDeductions.year}</span>
+                </div>
+                <Sparkles className="w-4 h-4 text-indigo-500 animate-pulse" />
               </div>
-            </CardHeader>
-            <CardContent className="px-4 md:px-6">
-              <div className="text-center py-3 md:py-4">
-                <p className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">
+              
+              <div className="mb-4">
+                <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-violet-400 bg-clip-text text-transparent">
                   {formatCurrency(taxDeductions.total)}
                 </p>
-                <p className="text-xs md:text-sm text-muted-foreground mt-1 md:mt-2">Eligible deductions claimed</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs text-muted-foreground">{taxDeductions.count} relief items</span>
+                  {taxDeductions.yoyChange !== 0 && (
+                    <span className={cn("flex items-center gap-0.5 text-xs font-medium px-1.5 py-0.5 rounded",
+                      taxDeductions.yoyChange > 0 ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500"
+                    )}>
+                      {taxDeductions.yoyChange > 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                      {Math.abs(taxDeductions.yoyChange).toFixed(0)}% vs {taxDeductions.previousYearLabel}
+                    </span>
+                  )}
+                </div>
               </div>
+              
+              {/* Mini breakdown */}
+              {taxDeductions.breakdown.length > 0 && (
+                <div className="space-y-2 mb-4">
+                  {taxDeductions.breakdown.slice(0, 3).map((item, idx) => (
+                    <div key={idx} className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground truncate max-w-[140px]">{item.category}</span>
+                      <span className="font-medium">{formatCurrency(item.total)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
               <Link
                 href="/dashboard/tax"
-                className="flex items-center justify-center gap-2 w-full py-2.5 mt-3 md:mt-4 text-sm font-medium border border-indigo-500/30 rounded-lg hover:bg-indigo-500/10 transition-colors text-indigo-400 touch-target"
+                className="flex items-center justify-center gap-2 w-full py-2.5 text-sm font-medium bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 rounded-lg transition-colors text-indigo-400 touch-target"
               >
-                Manage Tax Relief <ArrowRight className="w-4 h-4" />
+                View Full Tax Summary <ArrowRight className="w-4 h-4" />
               </Link>
             </CardContent>
           </Card>
