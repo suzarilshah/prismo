@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
@@ -170,7 +170,17 @@ export default function DashboardLayout({
 }) {
   const { user, signOut, isLoading, isAuthenticated } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
   const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Handle search submission
+  const handleSearch = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/dashboard/transactions?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  }, [searchQuery, router]);
 
   // Fetch finance groups
   const { data: financeGroupsData } = useQuery<FinanceGroup[]>({
@@ -402,16 +412,18 @@ export default function DashboardLayout({
             <Logo href="/" variant="icon" size="sm" />
           </div>
 
-          <div className="hidden md:flex items-center gap-4 flex-1 max-w-xl">
+          <form onSubmit={handleSearch} className="hidden md:flex items-center gap-4 flex-1 max-w-xl">
             <div className="relative w-full group">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
               <input 
                 type="text" 
-                placeholder="Search transactions..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search transactions... (press Enter)" 
                 className="w-full h-9 pl-10 pr-4 rounded-lg bg-muted/50 border border-border focus:outline-none focus:border-primary/50 focus:bg-muted text-sm transition-all placeholder:text-muted-foreground/70"
               />
             </div>
-          </div>
+          </form>
 
           <div className="flex items-center gap-2">
             <ThemeToggle />

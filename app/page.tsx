@@ -1,5 +1,6 @@
 "use client";
 
+import { useTheme } from "next-themes";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -132,8 +133,15 @@ const features = [
 ];
 
 export default function LandingPage() {
+  const { setTheme } = useTheme();
+
+  // Force dark mode on landing page
+  useEffect(() => {
+    setTheme("dark");
+  }, [setTheme]);
+
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-primary/30">
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-primary/30 dark">
       {/* Ambient Background */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[600px] bg-gradient-to-b from-blue-600/20 via-purple-600/10 to-transparent blur-[120px] opacity-60" />

@@ -172,30 +172,31 @@ function ConversationHistory({
                     onClose();
                   }}
                   className={cn(
-                    "w-full flex items-start gap-2 p-2 rounded-lg text-left",
+                    "w-full flex items-center gap-2 p-2.5 rounded-lg text-left",
                     "hover:bg-muted/50 transition-colors",
                     currentConversationId === conv.id && "bg-muted"
                   )}
                 >
-                  <MessageSquare className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
+                  <MessageSquare className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <div className="flex-1 min-w-0 overflow-hidden">
+                    <p className="text-sm font-medium truncate max-w-[180px]">
                       {conv.title || "New Conversation"}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground truncate">
                       {conv.totalMessages} messages
                     </p>
                   </div>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                    className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 hover:bg-destructive/10"
                     onClick={(e) => {
                       e.stopPropagation();
                       deleteConversation(conv.id);
                     }}
+                    title="Delete conversation"
                   >
-                    <Trash2 className="h-3 w-3 text-destructive" />
+                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
                   </Button>
                 </button>
               </motion.div>

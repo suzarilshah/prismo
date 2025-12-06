@@ -16,7 +16,8 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-// Tooltip not used in this component
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import {
   Check,
   Copy,
@@ -44,84 +45,91 @@ interface MessageMetadataProps {
 }
 
 // =============================================================================
-// Simple Markdown Renderer
+// Markdown Renderer with proper styling
 // =============================================================================
 
-function SimpleMarkdown({ content }: { content: string }) {
-  // Convert markdown to JSX (simplified)
-  const lines = content.split("\n");
-  
+function MarkdownContent({ content }: { content: string }) {
   return (
-    <div className="prose prose-sm max-w-none">
-      {lines.map((line, i) => {
-        // Headers
-        if (line.startsWith("### ")) {
-          return <h3 key={i} className="text-sm font-semibold mt-3 mb-1">{line.slice(4)}</h3>;
-        }
-        if (line.startsWith("## ")) {
-          return <h2 key={i} className="text-base font-semibold mt-4 mb-2">{line.slice(3)}</h2>;
-        }
-        if (line.startsWith("# ")) {
-          return <h1 key={i} className="text-lg font-bold mt-4 mb-2">{line.slice(2)}</h1>;
-        }
-        
-        // Bullet points
-        if (line.startsWith("- ") || line.startsWith("* ")) {
+    <div className="prose prose-sm max-w-none dark:prose-invert prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+        h1: ({ children }) => (
+          <h1 className="text-lg font-bold mt-4 mb-2 text-foreground">{children}</h1>
+        ),
+        h2: ({ children }) => (
+          <h2 className="text-base font-semibold mt-3 mb-2 text-foreground">{children}</h2>
+        ),
+        h3: ({ children }) => (
+          <h3 className="text-sm font-semibold mt-2 mb-1 text-foreground">{children}</h3>
+        ),
+        p: ({ children }) => (
+          <p className="mb-2 leading-relaxed text-foreground/90">{children}</p>
+        ),
+        ul: ({ children }) => (
+          <ul className="list-disc list-inside space-y-1 ml-1 text-foreground/90">{children}</ul>
+        ),
+        ol: ({ children }) => (
+          <ol className="list-decimal list-inside space-y-1 ml-1 text-foreground/90">{children}</ol>
+        ),
+        li: ({ children }) => (
+          <li className="text-foreground/90">{children}</li>
+        ),
+        strong: ({ children }) => (
+          <strong className="font-semibold text-foreground">{children}</strong>
+        ),
+        em: ({ children }) => (
+          <em className="italic text-foreground/80">{children}</em>
+        ),
+        code: ({ children, className }) => {
+          const isCodeBlock = className?.includes("language-");
+          if (isCodeBlock) {
+            return (
+              <code className="block p-3 my-2 rounded-lg bg-muted/80 text-xs font-mono overflow-x-auto">
+                {children}
+              </code>
+            );
+          }
           return (
-            <div key={i} className="flex gap-2 ml-2">
-              <span className="text-primary">•</span>
-              <span>{formatInlineMarkdown(line.slice(2))}</span>
-            </div>
-          );
-        }
-        
-        // Numbered lists
-        const numberedMatch = line.match(/^(\d+)\.\s/);
-        if (numberedMatch) {
-          return (
-            <div key={i} className="flex gap-2 ml-2">
-              <span className="text-muted-foreground">{numberedMatch[1]}.</span>
-              <span>{formatInlineMarkdown(line.slice(numberedMatch[0].length))}</span>
-            </div>
-          );
-        }
-        
-        // Empty lines
-        if (!line.trim()) {
-          return <div key={i} className="h-2" />;
-        }
-        
-        // Regular paragraphs
-        return <p key={i} className="mb-1">{formatInlineMarkdown(line)}</p>;
-      })}
-    </div>
-  );
-}
-
-function formatInlineMarkdown(text: string): React.ReactNode {
-  // Bold
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
-  
-  return parts.map((part, i) => {
-    if (part.startsWith("**") && part.endsWith("**")) {
-      return <strong key={i} className="font-semibold">{part.slice(2, -2)}</strong>;
-    }
-    // Inline code
-    if (part.includes("`")) {
-      const codeParts = part.split(/(`[^`]+`)/g);
-      return codeParts.map((codePart, j) => {
-        if (codePart.startsWith("`") && codePart.endsWith("`")) {
-          return (
-            <code key={`${i}-${j}`} className="px-1 py-0.5 bg-muted rounded text-xs font-mono">
-              {codePart.slice(1, -1)}
+            <code className="px-1.5 py-0.5 bg-muted rounded text-xs font-mono text-primary">
+              {children}
             </code>
           );
-        }
-        return codePart;
-      });
-    }
-    return part;
-  });
+        },
+        pre: ({ children }) => (
+          <pre className="my-2 overflow-x-auto">{children}</pre>
+        ),
+        blockquote: ({ children }) => (
+          <blockquote className="border-l-2 border-primary/50 pl-3 my-2 italic text-muted-foreground">
+            {children}
+          </blockquote>
+        ),
+        a: ({ href, children }) => (
+          <a href={href} className="text-primary underline hover:text-primary/80" target="_blank" rel="noopener noreferrer">
+            {children}
+          </a>
+        ),
+        table: ({ children }) => (
+          <div className="overflow-x-auto my-2">
+            <table className="min-w-full text-xs border border-border rounded-lg">
+              {children}
+            </table>
+          </div>
+        ),
+        th: ({ children }) => (
+          <th className="px-3 py-2 bg-muted/50 font-semibold text-left border-b border-border">
+            {children}
+          </th>
+        ),
+        td: ({ children }) => (
+          <td className="px-3 py-2 border-b border-border/50">{children}</td>
+        ),
+      }}
+      >
+        {content}
+      </ReactMarkdown>
+    </div>
+  );
 }
 
 // =============================================================================
@@ -311,7 +319,7 @@ export const AIMessageBubble = memo(function AIMessageBubble({
             <p className="whitespace-pre-wrap">{content}</p>
           ) : (
             <>
-              <SimpleMarkdown content={content} />
+              <MarkdownContent content={content} />
               {isStreaming && <StreamingCursor />}
             </>
           )}
