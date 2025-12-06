@@ -52,7 +52,7 @@ function SimpleMarkdown({ content }: { content: string }) {
   const lines = content.split("\n");
   
   return (
-    <div className="prose prose-sm dark:prose-invert max-w-none">
+    <div className="prose prose-sm max-w-none">
       {lines.map((line, i) => {
         // Headers
         if (line.startsWith("### ")) {
@@ -292,7 +292,7 @@ export const AIMessageBubble = memo(function AIMessageBubble({
         <div
           className={cn(
             "text-xs font-medium mb-1",
-            isUser ? "text-muted-foreground" : "text-violet-500 dark:text-violet-400"
+            isUser ? "text-muted-foreground" : "text-primary"
           )}
         >
           {isUser ? "You" : "Prismo AI"}

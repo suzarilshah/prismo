@@ -4,72 +4,133 @@
 
 @layer base {
   :root {
-    /* Light Mode - Clean, modern, professional */
-    --background: 0 0% 99%;
-    --foreground: 224 71% 4%;
+    /* Light Mode - Premium, $100B app design inspired by Stripe/Linear */
+    /* Base colors with perceptually uniform lightness */
+    --background: 0 0% 100%;
+    --foreground: 224 71% 11%;
+    
+    /* Card hierarchy with subtle differentiation */
     --card: 0 0% 100%;
-    --card-foreground: 224 71% 4%;
+    --card-foreground: 224 71% 11%;
+    --card-hover: 220 13% 99%;
+    
+    /* Popover with shadow hint */
     --popover: 0 0% 100%;
-    --popover-foreground: 224 71% 4%;
-    --primary: 262 83% 58%;
+    --popover-foreground: 224 71% 11%;
+    
+    /* Primary - Electric violet with consistent perceived brightness */
+    --primary: 263 70% 50%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 224 71% 4%;
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
-    --accent: 262 83% 58%;
+    --primary-hover: 263 70% 45%;
+    
+    /* Secondary - Neutral gray with warmth */
+    --secondary: 220 13% 95%;
+    --secondary-foreground: 224 71% 11%;
+    --secondary-hover: 220 13% 91%;
+    
+    /* Muted - Softer contrast for less important elements */
+    --muted: 220 13% 95%;
+    --muted-foreground: 224 71% 40%;
+    
+    /* Accent - Matches primary for consistency */
+    --accent: 263 70% 50%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
+    
+    /* Destructive - Carefully balanced red */
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 262 83% 58%;
+    
+    /* Borders - Subtle but visible */
+    --border: 220 13% 90%;
+    --input: 220 13% 90%;
+    --ring: 263 70% 50%;
+    
+    /* Border radius for modern feel */
     --radius: 0.5rem;
-    /* Chart colors - vibrant for light mode */
-    --chart-1: 262 83% 58%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    /* Success/Warning colors */
-    --success: 142 76% 36%;
+    
+    /* Chart colors - Perceptually balanced for accessibility */
+    --chart-1: 263 70% 50%; /* Violet */
+    --chart-2: 160 60% 40%; /* Teal */
+    --chart-3: 220 70% 50%; /* Blue */
+    --chart-4: 142 60% 40%; /* Green */
+    --chart-5: 24 70% 50%; /* Orange */
+    
+    /* Status colors with consistent brightness */
+    --success: 142 60% 40%;
     --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
+    --warning: 38 70% 50%;
     --warning-foreground: 0 0% 100%;
+    --info: 220 70% 50%;
+    --info-foreground: 0 0% 100%;
+    
+    /* Additional semantic colors */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 224 71% 11%;
+    --sidebar-border: 220 13% 90%;
+    
+    /* Shadow values for depth */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   }
 
   .dark {
-    /* Dark Mode - Deep navy, sophisticated */
+    /* Dark Mode - Sophisticated deep navy */
     --background: 224 71% 4%;
     --foreground: 213 31% 91%;
+    
     --card: 224 71% 4%;
     --card-foreground: 213 31% 91%;
+    --card-hover: 224 71% 7%;
+    
     --popover: 224 71% 4%;
     --popover-foreground: 213 31% 91%;
+    
     --primary: 263 70% 50%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 215 28% 17%;
+    --primary-hover: 263 70% 55%;
+    
+    --secondary: 224 71% 10%;
     --secondary-foreground: 213 31% 91%;
-    --muted: 215 28% 17%;
-    --muted-foreground: 215 20% 65%;
+    --secondary-hover: 224 71% 12%;
+    
+    --muted: 224 71% 10%;
+    --muted-foreground: 213 31% 60%;
+    
     --accent: 263 70% 50%;
     --accent-foreground: 0 0% 100%;
+    
     --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 100%;
-    --border: 215 28% 17%;
-    --input: 215 28% 17%;
+    
+    --border: 224 71% 10%;
+    --input: 224 71% 10%;
     --ring: 263 70% 50%;
-    /* Chart colors - adjusted for dark mode */
+    
+    /* Chart colors adjusted for dark mode */
     --chart-1: 263 70% 50%;
     --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    /* Success/Warning colors */
-    --success: 142 70% 45%;
+    --chart-3: 220 70% 55%;
+    --chart-4: 142 60% 45%;
+    --chart-5: 24 70% 55%;
+    
+    /* Status colors for dark mode */
+    --success: 142 60% 45%;
     --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
+    --warning: 38 70% 55%;
     --warning-foreground: 0 0% 0%;
+    --info: 220 70% 55%;
+    --info-foreground: 0 0% 100%;
+    
+    /* Sidebar in dark mode */
+    --sidebar-background: 224 71% 3%;
+    --sidebar-foreground: 213 31% 91%;
+    --sidebar-border: 224 71% 10%;
+    
+    /* Shadow values for dark mode */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.35), 0 4px 6px -2px rgba(0, 0, 0, 0.25);
   }
 }
 
@@ -94,9 +155,17 @@
                       linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
   }
 
-  /* Premium card style */
+  /* Premium card style with theme support */
   .card-bento {
-    @apply bg-white/[0.02] border border-white/[0.05] rounded-3xl p-6 transition-all duration-300 hover:bg-white/[0.04] hover:border-white/10;
+    @apply rounded-3xl p-6 transition-all duration-300 border;
+  }
+
+  .light .card-bento {
+    @apply bg-white border-gray-200 hover:shadow-md hover:border-gray-300;
+  }
+
+  .dark .card-bento {
+    @apply bg-white/[0.02] border-white/[0.05] hover:bg-white/[0.04] hover:border-white/10;
   }
 
   /* Glass effect */
@@ -125,25 +194,89 @@
     @apply bg-card border border-border rounded-2xl transition-all duration-300 hover:border-primary/20;
   }
 
-  /* Light mode specific adjustments */
+  /* Light mode specific utilities */
   .light .data-card {
-    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+    box-shadow: var(--shadow-sm);
+    background: linear-gradient(to bottom, white, hsl(220 13% 99.5%));
   }
 
   .light .data-card:hover {
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    box-shadow: var(--shadow-md);
+    background: linear-gradient(to bottom, white, hsl(220 13% 99%));
+    transform: translateY(-1px);
+    transition: all 0.2s ease;
+  }
+
+  /* Premium gradient backgrounds for light mode */
+  .light .bg-gradient-premium {
+    background: linear-gradient(135deg, hsl(263 70% 98%) 0%, hsl(220 70% 98%) 100%);
+  }
+
+  .light .bg-gradient-subtle {
+    background: linear-gradient(180deg, transparent 0%, hsl(220 13% 99%) 100%);
   }
 
   /* Grid pattern for light mode */
-  .bg-grid-pattern-light {
+  .bg-grid-pattern {
     background-size: 40px 40px;
-    background-image: linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
-                      linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+    background-image: 
+      linear-gradient(to right, hsl(220 13% 93%) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(220 13% 93%) 1px, transparent 1px);
   }
 
-  /* Glass effect for light mode */
+  .dark .bg-grid-pattern {
+    background-image: 
+      linear-gradient(to right, hsl(224 71% 8%) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(224 71% 8%) 1px, transparent 1px);
+  }
+
+  /* Glass effect with better light mode support */
+  .glass {
+    @apply backdrop-blur-xl border;
+  }
+
   .light .glass {
-    @apply bg-white/70 backdrop-blur-xl border border-gray-200/50;
+    @apply bg-white/60 border-gray-200/50;
+  }
+
+  .dark .glass {
+    @apply bg-zinc-950/60 border-zinc-800/50;
+  }
+
+  /* Text contrast helpers */
+  .text-subtle {
+    @apply text-muted-foreground;
+  }
+
+  /* Button hover states for light mode */
+  .light .hover-lift {
+    @apply transition-all duration-200 hover:shadow-md hover:-translate-y-0.5;
+  }
+
+  /* Consistent focus states */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+
+  .light .focus-ring {
+    @apply focus-visible:ring-offset-white;
+  }
+
+  .dark .focus-ring {
+    @apply focus-visible:ring-offset-zinc-950;
+  }
+
+  /* Consistent hover colors for interactive elements */
+  .interactive-hover {
+    @apply transition-colors duration-200;
+  }
+
+  .light .interactive-hover:hover {
+    @apply bg-gray-50;
+  }
+
+  .dark .interactive-hover:hover {
+    @apply bg-zinc-900;
   }
 }
 
