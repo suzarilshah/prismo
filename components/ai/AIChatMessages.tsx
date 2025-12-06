@@ -41,7 +41,7 @@ function EmptyState() {
       <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-600/20 flex items-center justify-center mb-4">
         <Sparkles className="w-8 h-8 text-violet-500" />
       </div>
-      <h3 className="text-lg font-semibold mb-2">Hi, I'm Prismo AI</h3>
+      <h3 className="text-lg font-semibold mb-2">Hi, I am Prismo AI</h3>
       <p className="text-sm text-muted-foreground max-w-sm">
         Your personal finance assistant. Ask me about your spending, budgets,
         taxes, or anything financial!
