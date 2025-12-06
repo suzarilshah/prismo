@@ -13,11 +13,22 @@ import {
   Zap,
   Check,
   ChevronRight,
-  Play
+  Play,
+  Sparkles,
+  Brain,
+  MessageSquare,
+  Receipt,
+  Target,
+  Calculator,
+  Bot,
+  Wallet,
+  PieChart,
+  TrendingUp,
+  FileText,
 } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
-import { Star, Lock, TrendingUp } from "lucide-react";
+import { Star, Lock } from "lucide-react";
 import { Logo } from "@/components/logo";
 
 // Animated counter component
@@ -100,36 +111,70 @@ const features = [
     title: "Real-time Analytics",
     description: "Track income, expenses, and cash flow with precision. Live dashboards update every second.",
     color: "from-blue-500 to-cyan-500",
-    size: "large"
   },
   {
     icon: CreditCard,
     title: "Smart Transactions",
     description: "Auto-categorize expenses with AI. Never miss a tax deduction.",
     color: "from-purple-500 to-pink-500",
-    size: "small"
   },
   {
     icon: Shield,
     title: "Bank-grade Security",
     description: "256-bit encryption. SOC 2 Type II certified.",
     color: "from-emerald-500 to-teal-500",
-    size: "small"
   },
   {
-    icon: Globe,
-    title: "Multi-currency",
-    description: "Hold MYR, USD, SGD seamlessly. Real-time exchange rates.",
+    icon: Calculator,
+    title: "LHDN Tax Calculator",
+    description: "Malaysian tax optimization built-in. Maximize reliefs automatically.",
     color: "from-orange-500 to-yellow-500",
-    size: "small"
   },
   {
-    icon: Zap,
-    title: "Automation",
-    description: "Set up recurring payments, budget alerts, and goal tracking on autopilot.",
+    icon: Target,
+    title: "Goal Tracking",
+    description: "Set financial goals and watch your progress with visual milestones.",
+    color: "from-pink-500 to-rose-500",
+  },
+  {
+    icon: Wallet,
+    title: "Subscription Manager",
+    description: "Track all recurring payments. Get alerts before renewals.",
     color: "from-violet-500 to-purple-500",
-    size: "large"
   }
+];
+
+const aiFeatures = [
+  {
+    icon: MessageSquare,
+    title: "Spending Analysis",
+    description: "Analyze spending patterns and identify savings opportunities",
+  },
+  {
+    icon: Target,
+    title: "Goal Progress",
+    description: "Track progress towards financial goals with AI insights",
+  },
+  {
+    icon: PieChart,
+    title: "Budget Health",
+    description: "Monitor budget performance and get optimization tips",
+  },
+  {
+    icon: Calculator,
+    title: "Tax Optimization",
+    description: "Find eligible deductions based on your transactions",
+  },
+  {
+    icon: Receipt,
+    title: "Subscription Review",
+    description: "Review subscriptions and suggest which to cancel",
+  },
+  {
+    icon: TrendingUp,
+    title: "Savings Advice",
+    description: "Personalized recommendations to grow your savings",
+  },
 ];
 
 export default function LandingPage() {
@@ -335,16 +380,25 @@ export default function LandingPage() {
       {/* Features */}
       <section id="features" className="relative py-32">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-20">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-20"
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-sm mb-6">
+              <Zap className="w-4 h-4 text-blue-400" />
+              <span className="text-blue-400 font-medium">Powerful Features</span>
+            </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
               Everything you need to
               <br />
-              <span className="text-white/40">master your money</span>
+              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">master your money</span>
             </h2>
             <p className="text-lg text-white/50 max-w-2xl mx-auto">
               Built for Malaysian professionals who want complete control over their financial future.
             </p>
-          </div>
+          </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature, i) => (
@@ -354,7 +408,7 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className={`group p-8 rounded-3xl bg-white/[0.02] border border-white/[0.05] hover:border-white/10 hover:bg-white/[0.04] transition-all duration-500 ${feature.size === 'large' ? 'md:col-span-2 lg:col-span-1' : ''}`}
+                className="group p-8 rounded-3xl bg-white/[0.02] border border-white/[0.05] hover:border-white/10 hover:bg-white/[0.04] transition-all duration-500"
               >
                 <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500`}>
                   <feature.icon className="w-6 h-6 text-white" />
@@ -363,6 +417,142 @@ export default function LandingPage() {
                 <p className="text-white/50 leading-relaxed">{feature.description}</p>
               </motion.div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* AI Assistant Section - HERO */}
+      <section className="relative py-32 overflow-hidden">
+        {/* AI Glow Background */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-violet-600/20 via-purple-600/20 to-pink-600/20 blur-[120px] rounded-full" />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Left - Content */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/20 text-sm mb-6">
+                <Sparkles className="w-4 h-4 text-violet-400" />
+                <span className="text-violet-400 font-medium">AI-Powered</span>
+                <span className="px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 text-xs font-bold">NEW</span>
+              </div>
+              
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+                Meet <span className="bg-gradient-to-r from-violet-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Prismo AI</span>
+                <br />
+                <span className="text-white/60">Your Financial Assistant</span>
+              </h2>
+              
+              <p className="text-lg text-white/50 mb-8 leading-relaxed max-w-lg">
+                Ask anything about your finances. Get instant insights, personalized recommendations, 
+                and actionable advice powered by advanced AI that understands Malaysian tax laws.
+              </p>
+
+              {/* AI Feature Pills */}
+              <div className="grid grid-cols-2 gap-4 mb-10">
+                {aiFeatures.slice(0, 4).map((feature, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                    className="flex items-start gap-3 p-4 rounded-2xl bg-white/[0.03] border border-white/[0.05] hover:border-violet-500/20 hover:bg-violet-500/5 transition-all group"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center group-hover:from-violet-500/30 group-hover:to-purple-500/30 transition-colors">
+                      <feature.icon className="w-5 h-5 text-violet-400" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-sm mb-0.5">{feature.title}</h4>
+                      <p className="text-xs text-white/40 leading-relaxed">{feature.description}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link href="/dashboard">
+                  <Button size="lg" className="h-14 px-8 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white font-semibold rounded-xl text-base shadow-2xl shadow-violet-500/25 border-0">
+                    <Bot className="mr-2 w-5 h-5" />
+                    Try Prismo AI Free
+                  </Button>
+                </Link>
+                <Button size="lg" variant="outline" className="h-14 px-8 bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-xl text-base backdrop-blur-sm">
+                  <Play className="mr-2 w-4 h-4" />
+                  See it in action
+                </Button>
+              </div>
+            </motion.div>
+
+            {/* Right - AI Screenshot */}
+            <motion.div
+              initial={{ opacity: 0, x: 30, scale: 0.95 }}
+              whileInView={{ opacity: 1, x: 0, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="relative"
+            >
+              {/* Animated gradient border */}
+              <div className="absolute -inset-[2px] bg-gradient-to-r from-violet-500 via-purple-500 to-pink-500 rounded-2xl opacity-50 blur-sm animate-pulse" />
+              
+              <div className="relative">
+                {/* Glow Effect */}
+                <div className="absolute inset-0 bg-gradient-to-t from-violet-500/20 to-purple-500/20 blur-3xl opacity-50" />
+                
+                {/* AI Interface Frame */}
+                <div className="relative rounded-2xl border border-white/10 bg-[#0a0a0a] overflow-hidden shadow-2xl shadow-violet-500/10">
+                  {/* Browser Chrome */}
+                  <div className="h-11 bg-[#1a1a1a] border-b border-white/5 flex items-center px-4 gap-3">
+                    <div className="flex gap-2">
+                      <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
+                      <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
+                      <div className="w-3 h-3 rounded-full bg-[#28c840]" />
+                    </div>
+                    <div className="flex-1 flex justify-center">
+                      <div className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-white/5 text-xs text-white/40">
+                        <Sparkles className="w-3 h-3 text-violet-400" />
+                        Prismo AI Assistant
+                      </div>
+                    </div>
+                    <div className="w-16" />
+                  </div>
+                  
+                  {/* AI Screenshot */}
+                  <div className="relative w-full">
+                    <Image
+                      src="/screenshots/ai-assistant.png"
+                      alt="Prismo AI Assistant"
+                      width={1920}
+                      height={1080}
+                      className="w-full h-auto"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Floating Elements */}
+              <motion.div
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute -top-4 -right-4 p-3 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/30"
+              >
+                <Brain className="w-6 h-6 text-white" />
+              </motion.div>
+              
+              <motion.div
+                animate={{ y: [0, 10, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                className="absolute -bottom-4 -left-4 p-3 rounded-xl bg-gradient-to-br from-pink-500 to-rose-600 shadow-lg shadow-pink-500/30"
+              >
+                <MessageSquare className="w-6 h-6 text-white" />
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </section>
