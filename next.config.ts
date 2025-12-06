@@ -23,13 +23,8 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "10mb",
     },
   },
-  webpack: (config) => {
-    // Simple optimization without breaking changes
-    config.performance = {
-      hints: false,
-    };
-    return config;
-  },
+  // Empty turbopack config to use Turbopack (Next.js 16 default)
+  turbopack: {},
 };
 
 export default nextConfig;
