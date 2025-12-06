@@ -183,5 +183,36 @@ export async function getCurrentUser() {
     salary: user.salary,
     twoFactorEnabled: user.twoFactorEnabled,
     createdAt: user.createdAt,
+    profileImageUrl: user.profileImageUrl,
+  };
+}
+
+// Get current user from database by Stack ID or email
+export async function getCurrentUserByStackId(stackId: string, email?: string) {
+  // First try to find by Stack ID
+  let user = await db.query.users.findFirst({
+    where: eq(users.stackId, stackId),
+  });
+
+  // If not found by Stack ID, try email
+  if (!user && email) {
+    user = await db.query.users.findFirst({
+      where: eq(users.email, email.toLowerCase()),
+    });
+  }
+
+  if (!user) return null;
+
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    currency: user.currency,
+    occupation: user.occupation,
+    salary: user.salary,
+    twoFactorEnabled: user.twoFactorEnabled,
+    createdAt: user.createdAt,
+    profileImageUrl: user.profileImageUrl,
+    needsOnboarding: !user.occupation && !user.salary,
   };
 }

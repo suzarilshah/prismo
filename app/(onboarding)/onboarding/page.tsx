@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { completeOnboarding } from "@/app/actions/onboarding";
+import { useUser } from "@stackframe/stack";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
 
 const steps = [
   { id: "welcome", title: "Welcome", icon: Sparkles },
@@ -49,6 +51,8 @@ const WORKSPACE_TYPES = [
 export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  const stackUser = useUser();
   
   // Form State - Enhanced with all profiling data
   const [formData, setFormData] = useState({
@@ -81,6 +85,39 @@ export default function OnboardingPage() {
     primaryGoal: "",
     targetEmergencyFund: "",
   });
+
+  // Pre-fill form data from Stack Auth user (Google OAuth)
+  useEffect(() => {
+    if (stackUser) {
+      const displayName = stackUser.displayName || "";
+      const nameParts = displayName.split(" ");
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts.slice(1).join(" ") || "";
+      
+      setFormData(prev => ({
+        ...prev,
+        firstName: prev.firstName || firstName,
+        lastName: prev.lastName || lastName,
+      }));
+      
+      // Set profile image URL from Google
+      if (stackUser.profileImageUrl) {
+        setProfileImageUrl(stackUser.profileImageUrl);
+      }
+    }
+    
+    // Also check localStorage for pending name (from email signup)
+    const pendingName = localStorage.getItem("prismo_pending_name");
+    if (pendingName) {
+      const nameParts = pendingName.split(" ");
+      setFormData(prev => ({
+        ...prev,
+        firstName: prev.firstName || nameParts[0] || "",
+        lastName: prev.lastName || nameParts.slice(1).join(" ") || "",
+      }));
+      localStorage.removeItem("prismo_pending_name");
+    }
+  }, [stackUser]);
 
   // Auto-generate workspace name suggestion
   useEffect(() => {
@@ -250,6 +287,22 @@ export default function OnboardingPage() {
           {/* Step 1: Profile */}
           {currentStep === 1 && (
             <div className="space-y-5 animate-in fade-in slide-in-from-right-8 duration-500">
+              {/* Profile Picture */}
+              <div className="flex justify-center mb-6">
+                <div className="text-center">
+                  <ProfileAvatar
+                    src={profileImageUrl}
+                    name={`${formData.firstName} ${formData.lastName}`}
+                    size="xl"
+                    editable={true}
+                    onImageChange={setProfileImageUrl}
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Click to upload a profile picture
+                  </p>
+                </div>
+              </div>
+              
               <div className="grid grid-cols-2 gap-5">
                 <div className="space-y-2">
                   <Label className="text-xs uppercase tracking-wider text-muted-foreground">First Name *</Label>

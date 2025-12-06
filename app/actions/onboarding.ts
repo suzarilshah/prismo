@@ -5,6 +5,7 @@ import { users, goals, financeGroups, financeGroupMembers, categories, userSetti
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
+import { stackServerApp } from "@/lib/stack";
 
 // Goal label mapping for display
 const GOAL_LABELS: Record<string, string> = {
@@ -41,16 +42,74 @@ export async function completeOnboarding(data: {
 }) {
   const name = `${data.firstName} ${data.lastName}`.trim();
   
-  // Try to get the authenticated user's session first
+  // Try to get the authenticated user's session
   let userId: string;
   let userEmail: string;
   
-  const session = await getSession();
+  // First, try Stack Auth
+  const stackUser = await stackServerApp.getUser();
   
-  if (session?.user?.id) {
-    // User is authenticated via Stack Auth - update their profile
-    userId = session.user.id;
-    userEmail = session.user.email || `${data.firstName.toLowerCase()}.${data.lastName.toLowerCase()}@prismo.app`;
+  // Also check legacy session
+  const legacySession = await getSession();
+  
+  if (stackUser) {
+    // User is authenticated via Stack Auth (Google OAuth, etc.)
+    userEmail = stackUser.primaryEmail?.toLowerCase() || `${data.firstName.toLowerCase()}.${data.lastName.toLowerCase()}@prismo.app`;
+    
+    // Find or create user in our database
+    let dbUser = await db.query.users.findFirst({
+      where: eq(users.stackId, stackUser.id),
+    });
+    
+    if (!dbUser) {
+      dbUser = await db.query.users.findFirst({
+        where: eq(users.email, userEmail),
+      });
+    }
+    
+    if (!dbUser) {
+      // Create new user
+      const [newUser] = await db
+        .insert(users)
+        .values({
+          email: userEmail,
+          name,
+          stackId: stackUser.id,
+          profileImageUrl: stackUser.profileImageUrl || null,
+          emailVerified: stackUser.primaryEmailVerified || false,
+          currency: data.currency,
+        })
+        .returning();
+      userId = newUser.id;
+    } else {
+      userId = dbUser.id;
+    }
+    
+    // Update user profile
+    await db
+      .update(users)
+      .set({
+        name,
+        stackId: stackUser.id,
+        phone: data.phone || null,
+        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : null,
+        occupation: data.occupation || null,
+        employmentType: data.employmentType || null,
+        employerName: data.employerName || null,
+        salary: data.monthlyIncome || null,
+        annualIncome: data.monthlyIncome ? (parseFloat(data.monthlyIncome) * 12).toString() : null,
+        currency: data.currency,
+        maritalStatus: data.maritalStatus || "single",
+        numberOfDependents: data.numberOfDependents ? parseInt(data.numberOfDependents) : 0,
+        taxResidentStatus: data.taxResidentStatus || "resident",
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
+      
+  } else if (legacySession?.user?.id) {
+    // User is authenticated via legacy JWT session
+    userId = legacySession.user.id;
+    userEmail = legacySession.user.email || `${data.firstName.toLowerCase()}.${data.lastName.toLowerCase()}@prismo.app`;
     
     // Update user profile
     await db

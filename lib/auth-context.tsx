@@ -12,6 +12,8 @@ interface User {
   salary?: string | null;
   twoFactorEnabled?: boolean;
   createdAt?: Date | null;
+  profileImageUrl?: string | null;
+  needsOnboarding?: boolean;
 }
 
 interface AuthContextType {
@@ -22,6 +24,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, name: string) => Promise<void>;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  syncUser: () => Promise<User | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -31,8 +34,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
+  // Sync Stack Auth user with our database
+  const syncUser = useCallback(async (): Promise<User | null> => {
+    try {
+      // Call sync endpoint to create/update user in our DB
+      const syncResponse = await fetch("/api/auth/sync", {
+        method: "POST",
+        credentials: "include",
+      });
+      
+      if (syncResponse.ok) {
+        const syncData = await syncResponse.json();
+        if (syncData.success) {
+          setUser(syncData.data);
+          return syncData.data;
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error("Failed to sync user:", error);
+      return null;
+    }
+  }, []);
+
+  // Refresh user data from our database
   const refreshUser = useCallback(async () => {
     try {
+      // First try Stack Auth sync endpoint
+      const syncResponse = await fetch("/api/auth/sync", {
+        method: "GET",
+        credentials: "include",
+      });
+      
+      if (syncResponse.ok) {
+        const data = await syncResponse.json();
+        if (data.success && !data.data.needsSync) {
+          setUser(data.data);
+          
+          // Redirect to onboarding if needed
+          if (data.data.needsOnboarding && window.location.pathname !== "/onboarding") {
+            router.push("/onboarding");
+          }
+          return;
+        } else if (data.success && data.data.needsSync) {
+          // User exists in Stack Auth but not in our DB - sync them
+          const syncedUser = await syncUser();
+          if (syncedUser) {
+            setUser(syncedUser);
+            if (syncedUser.needsOnboarding && window.location.pathname !== "/onboarding") {
+              router.push("/onboarding");
+            }
+          }
+          return;
+        }
+      }
+      
+      // Fall back to legacy auth check
       const response = await fetch("/api/auth/me");
       if (response.ok) {
         const data = await response.json();
@@ -49,8 +106,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [syncUser, router]);
 
+  // Initial auth check
   useEffect(() => {
     refreshUser();
   }, [refreshUser]);
@@ -105,6 +163,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signUp,
         signOut,
         refreshUser,
+        syncUser,
       }}
     >
       {children}
