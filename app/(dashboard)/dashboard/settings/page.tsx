@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTheme } from "next-themes";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,11 +11,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { User, Globe, Bell, Shield, Palette, Database, Loader2, Brain, Sparkles } from "lucide-react";
+import { User, Globe, Bell, Shield, Palette, Database, Loader2, Brain, Sparkles, Sun, Moon, Monitor, Check } from "lucide-react";
 import { LoadingSpinner } from "@/components/loading-spinner";
 import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
 import { AISettingsForm } from "@/components/ai/AISettingsForm";
+import { cn } from "@/lib/utils";
 
 interface UserSettings {
   id?: string;
@@ -45,6 +47,13 @@ async function fetchUserSettings() {
 
 export default function SettingsPage() {
   const { user, isAuthenticated } = useAuth();
+  const { theme: currentTheme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const [settings, setSettings] = useState<UserSettings>({
     currency: "MYR",
@@ -258,23 +267,132 @@ export default function SettingsPage() {
                 <Palette className="w-5 h-5 text-primary" />
                 <CardTitle className="text-lg font-semibold">Appearance</CardTitle>
               </div>
+              <p className="text-sm text-muted-foreground mt-1">
+                Customize how Prismo looks on your device
+              </p>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="theme">Theme</Label>
-                <Select
-                  value={settings.theme}
-                  onValueChange={(value) => setSettings({ ...settings, theme: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="light">Light Mode</SelectItem>
-                    <SelectItem value="dark">Dark Mode</SelectItem>
-                    <SelectItem value="system">System Default</SelectItem>
-                  </SelectContent>
-                </Select>
+            <CardContent className="space-y-6">
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Theme</Label>
+                <div className="grid grid-cols-3 gap-3">
+                  {/* Light Mode Option */}
+                  <button
+                    onClick={() => {
+                      setTheme("light");
+                      setSettings({ ...settings, theme: "light" });
+                    }}
+                    className={cn(
+                      "relative flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200",
+                      "hover:border-primary/50 hover:bg-accent/50",
+                      mounted && currentTheme === "light"
+                        ? "border-primary bg-primary/5 shadow-sm"
+                        : "border-border bg-card"
+                    )}
+                  >
+                    <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden border border-border bg-white">
+                      {/* Light mode preview */}
+                      <div className="absolute inset-0 p-2">
+                        <div className="h-2 w-8 bg-gray-200 rounded mb-1.5" />
+                        <div className="h-1.5 w-12 bg-gray-100 rounded mb-2" />
+                        <div className="flex gap-1">
+                          <div className="h-6 w-6 bg-gray-100 rounded" />
+                          <div className="h-6 flex-1 bg-gray-50 rounded" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Sun className="w-4 h-4" />
+                      <span className="text-sm font-medium">Light</span>
+                    </div>
+                    {mounted && currentTheme === "light" && (
+                      <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                        <Check className="w-3 h-3 text-primary-foreground" />
+                      </div>
+                    )}
+                  </button>
+
+                  {/* Dark Mode Option */}
+                  <button
+                    onClick={() => {
+                      setTheme("dark");
+                      setSettings({ ...settings, theme: "dark" });
+                    }}
+                    className={cn(
+                      "relative flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200",
+                      "hover:border-primary/50 hover:bg-accent/50",
+                      mounted && currentTheme === "dark"
+                        ? "border-primary bg-primary/5 shadow-sm"
+                        : "border-border bg-card"
+                    )}
+                  >
+                    <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden border border-border bg-zinc-900">
+                      {/* Dark mode preview */}
+                      <div className="absolute inset-0 p-2">
+                        <div className="h-2 w-8 bg-zinc-700 rounded mb-1.5" />
+                        <div className="h-1.5 w-12 bg-zinc-800 rounded mb-2" />
+                        <div className="flex gap-1">
+                          <div className="h-6 w-6 bg-zinc-800 rounded" />
+                          <div className="h-6 flex-1 bg-zinc-800/50 rounded" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Moon className="w-4 h-4" />
+                      <span className="text-sm font-medium">Dark</span>
+                    </div>
+                    {mounted && currentTheme === "dark" && (
+                      <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                        <Check className="w-3 h-3 text-primary-foreground" />
+                      </div>
+                    )}
+                  </button>
+
+                  {/* System Option */}
+                  <button
+                    onClick={() => {
+                      setTheme("system");
+                      setSettings({ ...settings, theme: "system" });
+                    }}
+                    className={cn(
+                      "relative flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200",
+                      "hover:border-primary/50 hover:bg-accent/50",
+                      mounted && currentTheme === "system"
+                        ? "border-primary bg-primary/5 shadow-sm"
+                        : "border-border bg-card"
+                    )}
+                  >
+                    <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden border border-border">
+                      {/* System mode preview - split */}
+                      <div className="absolute inset-0 flex">
+                        <div className="w-1/2 bg-white p-1.5">
+                          <div className="h-1.5 w-4 bg-gray-200 rounded mb-1" />
+                          <div className="h-1 w-6 bg-gray-100 rounded mb-1.5" />
+                          <div className="h-4 w-full bg-gray-50 rounded" />
+                        </div>
+                        <div className="w-1/2 bg-zinc-900 p-1.5">
+                          <div className="h-1.5 w-4 bg-zinc-700 rounded mb-1" />
+                          <div className="h-1 w-6 bg-zinc-800 rounded mb-1.5" />
+                          <div className="h-4 w-full bg-zinc-800 rounded" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Monitor className="w-4 h-4" />
+                      <span className="text-sm font-medium">System</span>
+                    </div>
+                    {mounted && currentTheme === "system" && (
+                      <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                        <Check className="w-3 h-3 text-primary-foreground" />
+                      </div>
+                    )}
+                  </button>
+                </div>
+                {mounted && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Currently showing: <span className="font-medium capitalize">{resolvedTheme}</span> theme
+                    {currentTheme === "system" && " (based on your system preference)"}
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
