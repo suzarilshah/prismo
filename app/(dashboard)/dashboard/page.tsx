@@ -37,23 +37,6 @@ import { ExpenseDonutChart } from "@/components/charts";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-  MeasuringStrategy,
-} from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  rectSortingStrategy,
-} from "@dnd-kit/sortable";
-import { SortableDashboardCard } from "@/components/ui/sortable-dashboard-card";
 
 // ============================================
 // TYPES
@@ -306,28 +289,6 @@ export default function DashboardPage() {
     setHasUnsavedChanges(false);
     setIsEditMode(false);
   }, [savedLayout]);
-
-  // dnd-kit sensors
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 8 },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
-  // Handle drag end
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    const { active, over } = event;
-    if (over && active.id !== over.id) {
-      const oldIndex = cardOrder.indexOf(active.id as string);
-      const newIndex = cardOrder.indexOf(over.id as string);
-      const newOrder = arrayMove(cardOrder, oldIndex, newIndex);
-      setCardOrder(newOrder);
-      setHasUnsavedChanges(true);
-    }
-  }, [cardOrder]);
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ["dashboard-stats"],
