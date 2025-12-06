@@ -1,11 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { jwtVerify } from "jose";
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "prismo-finance-secret-key-change-in-production"
-);
-
-const COOKIE_NAME = "prismo_session";
+import { stackServerApp } from "@/lib/stack";
 
 // Routes that require authentication
 const protectedRoutes = ["/dashboard", "/onboarding"];
@@ -13,19 +7,24 @@ const protectedRoutes = ["/dashboard", "/onboarding"];
 // Routes that should redirect to dashboard if already authenticated
 const authRoutes = ["/sign-in", "/sign-up"];
 
+// Routes to exclude from middleware processing
+const publicRoutes = ["/", "/handler", "/api"];
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get(COOKIE_NAME)?.value;
 
-  // Check if user has valid session
+  // Skip middleware for public routes, API routes, and handler routes
+  if (publicRoutes.some((route) => pathname === route || pathname.startsWith(route + "/"))) {
+    return NextResponse.next();
+  }
+
+  // Check if user has valid Stack Auth session
   let isAuthenticated = false;
-  if (token) {
-    try {
-      await jwtVerify(token, JWT_SECRET);
-      isAuthenticated = true;
-    } catch {
-      isAuthenticated = false;
-    }
+  try {
+    const user = await stackServerApp.getUser({ tokenStore: request });
+    isAuthenticated = !!user;
+  } catch {
+    isAuthenticated = false;
   }
 
   // Handle protected routes
