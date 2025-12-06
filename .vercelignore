@@ -1,0 +1,6 @@
+# Vercel ignore file
+test-screenshots/
+docs/
+*.md
+.env.example
+VERCEL_DEPLOYMENT_FIX.md
