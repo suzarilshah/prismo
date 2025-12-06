@@ -1,13 +1,13 @@
 "use client";
 
 /**
- * AI Chat Panel
+ * AI Chat Panel - Premium $100B App Design
  * 
- * Slide-out panel containing:
- * - Header with conversation controls
- * - Message list
- * - Chat input
- * - Conversation history sidebar
+ * Features:
+ * - Slide-out panel with conversation controls
+ * - Chat history with delete functionality
+ * - Message list with rich markdown
+ * - Quick action suggestions
  */
 
 import React, { memo, useState } from "react";
@@ -29,8 +29,16 @@ import {
   Trash2,
   Sparkles,
   AlertCircle,
+  MoreHorizontal,
+  Clock,
 } from "lucide-react";
 import Link from "next/link";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // =============================================================================
 // Types
@@ -111,7 +119,7 @@ function PanelHeader({
 }
 
 // =============================================================================
-// Conversation History Sidebar
+// Conversation History Sidebar - Premium Design
 // =============================================================================
 
 function ConversationHistory({
@@ -131,74 +139,149 @@ function ConversationHistory({
 
   if (!isVisible) return null;
 
+  // Format relative time
+  const formatRelativeTime = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
+  };
+
   return (
     <motion.div
-      initial={{ x: -300, opacity: 0 }}
+      initial={{ x: "-100%", opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      exit={{ x: -300, opacity: 0 }}
-      className="absolute inset-0 z-10 bg-background"
+      exit={{ x: "-100%", opacity: 0 }}
+      transition={{ type: "spring", damping: 25, stiffness: 200 }}
+      className="absolute inset-0 z-20 bg-background/95 backdrop-blur-xl border-r border-border"
     >
       {/* History Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
-        <h3 className="text-sm font-semibold">Chat History</h3>
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose}>
-          <ChevronLeft className="h-4 w-4" />
+      <div className="flex items-center justify-between h-14 px-4 border-b border-border bg-muted/30">
+        <div className="flex items-center gap-2">
+          <History className="h-4 w-4 text-primary" />
+          <h3 className="text-sm font-semibold">Chat History</h3>
+        </div>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-8 w-8 hover:bg-muted" 
+          onClick={onClose}
+        >
+          <X className="h-4 w-4" />
         </Button>
       </div>
 
       {/* Conversations List */}
-      <ScrollArea className="h-[calc(100%-49px)]">
+      <ScrollArea className="h-[calc(100%-56px)]">
         {isLoading ? (
-          <div className="p-4 text-center text-sm text-muted-foreground">
-            Loading...
+          <div className="flex items-center justify-center h-32">
+            <div className="animate-pulse flex items-center gap-2 text-muted-foreground">
+              <div className="w-2 h-2 rounded-full bg-primary animate-bounce" />
+              <div className="w-2 h-2 rounded-full bg-primary animate-bounce delay-100" />
+              <div className="w-2 h-2 rounded-full bg-primary animate-bounce delay-200" />
+            </div>
           </div>
         ) : conversations.length === 0 ? (
-          <div className="p-4 text-center">
-            <MessageSquare className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">No conversations yet</p>
+          <div className="flex flex-col items-center justify-center h-48 px-6 text-center">
+            <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center mb-3">
+              <MessageSquare className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <p className="text-sm font-medium text-foreground">No conversations yet</p>
+            <p className="text-xs text-muted-foreground mt-1">Start a new chat to get started</p>
           </div>
         ) : (
-          <div className="p-2 space-y-1">
-            {conversations.map((conv) => (
+          <div className="p-3 space-y-1">
+            {conversations.map((conv, index) => (
               <motion.div
                 key={conv.id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="group"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                className="group relative"
               >
-                <button
+                <div
                   onClick={() => {
                     selectConversation(conv.id);
                     onClose();
                   }}
                   className={cn(
-                    "w-full flex items-center gap-2 p-2.5 rounded-lg text-left",
-                    "hover:bg-muted/50 transition-colors",
-                    currentConversationId === conv.id && "bg-muted"
+                    "w-full flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all duration-200",
+                    "hover:bg-muted/70",
+                    currentConversationId === conv.id 
+                      ? "bg-primary/10 border border-primary/20" 
+                      : "bg-muted/30 border border-transparent"
                   )}
                 >
-                  <MessageSquare className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  {/* Icon */}
+                  <div className={cn(
+                    "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5",
+                    currentConversationId === conv.id 
+                      ? "bg-primary/20" 
+                      : "bg-muted"
+                  )}>
+                    <MessageSquare className={cn(
+                      "h-4 w-4",
+                      currentConversationId === conv.id 
+                        ? "text-primary" 
+                        : "text-muted-foreground"
+                    )} />
+                  </div>
+
+                  {/* Content */}
                   <div className="flex-1 min-w-0 overflow-hidden">
-                    <p className="text-sm font-medium truncate max-w-[180px]">
+                    <p className="text-sm font-medium truncate pr-8">
                       {conv.title || "New Conversation"}
                     </p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {conv.totalMessages} messages
-                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs text-muted-foreground">
+                        {conv.totalMessages} messages
+                      </span>
+                      {conv.updatedAt && (
+                        <>
+                          <span className="text-muted-foreground/50">•</span>
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {formatRelativeTime(conv.updatedAt)}
+                          </span>
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 hover:bg-destructive/10"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deleteConversation(conv.id);
-                    }}
-                    title="Delete conversation"
-                  >
-                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                  </Button>
-                </button>
+
+                  {/* Delete Button - Always visible */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-40">
+                      <DropdownMenuItem
+                        className="text-destructive focus:text-destructive cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteConversation(conv.id);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </motion.div>
             ))}
           </div>

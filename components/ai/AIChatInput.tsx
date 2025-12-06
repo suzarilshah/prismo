@@ -49,23 +49,23 @@ interface SuggestedPrompt {
 const SUGGESTED_PROMPTS: SuggestedPrompt[] = [
   {
     icon: <TrendingUp className="h-4 w-4" />,
-    text: "How am I spending compared to last month?",
-    category: "Spending",
-  },
-  {
-    icon: <PiggyBank className="h-4 w-4" />,
-    text: "Am I on track with my savings goals?",
-    category: "Goals",
+    text: "Give me a complete financial summary",
+    category: "Overview",
   },
   {
     icon: <Receipt className="h-4 w-4" />,
-    text: "What tax deductions am I missing?",
-    category: "Tax",
+    text: "List all my transactions this month",
+    category: "Transactions",
   },
   {
     icon: <CreditCard className="h-4 w-4" />,
-    text: "How can I reduce my subscriptions?",
+    text: "Show all my active subscriptions",
     category: "Subscriptions",
+  },
+  {
+    icon: <FileText className="h-4 w-4" />,
+    text: "What's my tax situation for YA 2025?",
+    category: "Tax",
   },
 ];
 
