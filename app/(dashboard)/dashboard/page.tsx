@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   ArrowUpRight, 
@@ -20,9 +20,13 @@ import {
   Wallet,
   Plus,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Settings2,
+  GripVertical,
+  Check,
+  X
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
@@ -30,9 +34,26 @@ import { DashboardSkeleton } from "@/components/ui/skeleton-loaders";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
 import { AnimatedProgress, CircularProgress } from "@/components/ui/animated-progress";
 import { ExpenseDonutChart } from "@/components/charts";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  MeasuringStrategy,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
+import { SortableDashboardCard } from "@/components/ui/sortable-dashboard-card";
 
 // ============================================
 // TYPES
@@ -198,11 +219,115 @@ function getHealthScoreGradient(score: number) {
 }
 
 // ============================================
+// DEFAULT CARD ORDER
+// ============================================
+const DEFAULT_CARD_ORDER = [
+  "health-score",
+  "net-cash-flow", 
+  "savings-rate",
+  "income",
+  "expenses",
+  "upcoming-bills",
+  "budget-health",
+  "goals",
+  "credit-cards",
+  "spending",
+  "recent-activity",
+  "tax-relief"
+];
+
+// ============================================
 // MAIN COMPONENT
 // ============================================
 export default function DashboardPage() {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
+  const queryClient = useQueryClient();
+  
+  // Edit mode state
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [cardOrder, setCardOrder] = useState<string[]>(DEFAULT_CARD_ORDER);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  // Fetch saved layout
+  const { data: savedLayout } = useQuery({
+    queryKey: ["dashboard-layout"],
+    queryFn: async () => {
+      const res = await fetch("/api/dashboard/layout");
+      if (!res.ok) return { cardOrder: DEFAULT_CARD_ORDER };
+      const data = await res.json();
+      return data.layout?.cardOrder?.length > 0 
+        ? data.layout 
+        : { cardOrder: DEFAULT_CARD_ORDER };
+    },
+    enabled: isAuthenticated,
+    staleTime: 60000,
+  });
+
+  // Update local state when saved layout is fetched
+  React.useEffect(() => {
+    if (savedLayout?.cardOrder) {
+      setCardOrder(savedLayout.cardOrder);
+    }
+  }, [savedLayout]);
+
+  // Save layout mutation
+  const { mutate: saveLayout, isPending: isSaving } = useMutation({
+    mutationFn: async (order: string[]) => {
+      const res = await fetch("/api/dashboard/layout", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cardOrder: order }),
+      });
+      if (!res.ok) throw new Error("Failed to save layout");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["dashboard-layout"] });
+      setHasUnsavedChanges(false);
+      setIsEditMode(false);
+    },
+  });
+
+  // Handle card reorder
+  const handleReorder = useCallback((newOrder: string[]) => {
+    setCardOrder(newOrder);
+    setHasUnsavedChanges(true);
+  }, []);
+
+  // Save and exit edit mode
+  const handleSave = useCallback(() => {
+    saveLayout(cardOrder);
+  }, [cardOrder, saveLayout]);
+
+  // Cancel and reset
+  const handleCancel = useCallback(() => {
+    setCardOrder(savedLayout?.cardOrder || DEFAULT_CARD_ORDER);
+    setHasUnsavedChanges(false);
+    setIsEditMode(false);
+  }, [savedLayout]);
+
+  // dnd-kit sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Handle drag end
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldIndex = cardOrder.indexOf(active.id as string);
+      const newIndex = cardOrder.indexOf(over.id as string);
+      const newOrder = arrayMove(cardOrder, oldIndex, newIndex);
+      setCardOrder(newOrder);
+      setHasUnsavedChanges(true);
+    }
+  }, [cardOrder]);
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ["dashboard-stats"],
@@ -216,6 +341,169 @@ export default function DashboardPage() {
   }
 
   const { overview, upcomingBills, budgets, creditCards, goals, spendingByCategory, recentTransactions, taxDeductions, healthScore, insights } = stats;
+
+  // Card definitions with their render functions and grid classes
+  const cardDefinitions: Record<string, { 
+    gridClass: string; 
+    render: () => React.ReactNode;
+    section: 'hero' | 'secondary' | 'tertiary' | 'quaternary';
+  }> = useMemo(() => ({
+    "health-score": {
+      gridClass: "col-span-12 md:col-span-6 lg:col-span-4 md:row-span-2",
+      section: 'hero',
+      render: () => (
+        <Card className="h-full bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 overflow-hidden relative">
+          <div className={cn("absolute inset-0 opacity-20 bg-gradient-to-br", getHealthScoreGradient(healthScore.score))} />
+          <CardContent className="p-4 md:p-6 h-full flex flex-col justify-between relative z-10">
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Financial Health</span>
+                <span className={cn("text-xs font-semibold px-2 py-0.5 rounded-full", 
+                  healthScore.status === 'excellent' && "bg-emerald-500/20 text-emerald-400",
+                  healthScore.status === 'good' && "bg-blue-500/20 text-blue-400",
+                  healthScore.status === 'fair' && "bg-amber-500/20 text-amber-400",
+                  healthScore.status === 'poor' && "bg-red-500/20 text-red-400"
+                )}>
+                  {healthScore.status.charAt(0).toUpperCase() + healthScore.status.slice(1)}
+                </span>
+              </div>
+              <div className="mt-4 md:mt-6 flex justify-center">
+                <CircularProgress 
+                  value={healthScore.score} 
+                  max={100} 
+                  size={typeof window !== 'undefined' && window.innerWidth < 768 ? 120 : 160}
+                  strokeWidth={12}
+                  color={healthScore.score >= 75 ? "#10b981" : healthScore.score >= 50 ? "#f59e0b" : "#ef4444"}
+                  showValue
+                  animate
+                />
+              </div>
+            </div>
+            <div className="mt-6 space-y-3">
+              {healthScore.factors.map((factor, idx) => (
+                <div key={idx} className="flex items-center justify-between">
+                  <span className="text-sm text-zinc-400">{factor.name}</span>
+                  <div className="flex items-center gap-2">
+                    <div className={cn("w-2 h-2 rounded-full",
+                      factor.status === 'good' && "bg-emerald-500",
+                      factor.status === 'warning' && "bg-amber-500",
+                      factor.status === 'poor' && "bg-red-500"
+                    )} />
+                    <span className="text-sm text-white font-medium">{Math.round(factor.score)}/25</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ),
+    },
+    "net-cash-flow": {
+      gridClass: "col-span-6 lg:col-span-4",
+      section: 'hero',
+      render: () => (
+        <Card className="h-full bg-gradient-to-br from-violet-500/10 to-purple-500/5 border-violet-500/20 hover:border-violet-500/40 transition-colors">
+          <CardContent className="p-4 md:p-6">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-[10px] md:text-xs font-semibold text-muted-foreground uppercase tracking-wide">Net Cash Flow</p>
+                <p className={cn("text-xl md:text-3xl font-bold tracking-tight mt-1 md:mt-2", 
+                  overview.netCashFlow >= 0 ? "text-emerald-500" : "text-red-500"
+                )}>
+                  {overview.netCashFlow >= 0 ? "+" : ""}{formatCurrency(overview.netCashFlow)}
+                </p>
+                <p className="text-xs md:text-sm text-muted-foreground mt-0.5 md:mt-1">This month</p>
+              </div>
+              <div className={cn("p-2 md:p-3 rounded-lg md:rounded-xl", overview.netCashFlow >= 0 ? "bg-emerald-500/10" : "bg-red-500/10")}>
+                <TrendingUp className={cn("w-5 h-5 md:w-6 md:h-6", overview.netCashFlow >= 0 ? "text-emerald-500" : "text-red-500 rotate-180")} />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ),
+    },
+    "savings-rate": {
+      gridClass: "col-span-6 lg:col-span-4",
+      section: 'hero',
+      render: () => (
+        <Card className="h-full bg-gradient-to-br from-cyan-500/10 to-teal-500/5 border-cyan-500/20 hover:border-cyan-500/40 transition-colors">
+          <CardContent className="p-4 md:p-6">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-[10px] md:text-xs font-semibold text-muted-foreground uppercase tracking-wide">Savings Rate</p>
+                <p className="text-xl md:text-3xl font-bold tracking-tight mt-1 md:mt-2">{overview.savingsRate.toFixed(1)}%</p>
+                <p className="text-xs md:text-sm text-muted-foreground mt-0.5 md:mt-1">Of income saved</p>
+              </div>
+              <div className="p-2 md:p-3 rounded-lg md:rounded-xl bg-cyan-500/10">
+                <PiggyBank className="w-5 h-5 md:w-6 md:h-6 text-cyan-500" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ),
+    },
+    "income": {
+      gridClass: "col-span-6 lg:col-span-4",
+      section: 'hero',
+      render: () => (
+        <Card className="h-full hover:shadow-lg hover:shadow-emerald-500/5 hover:border-emerald-500/20 transition-all touch-scale">
+          <CardContent className="p-3 md:p-5">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 md:gap-3 min-w-0">
+                <div className="p-2 md:p-2.5 rounded-lg bg-emerald-500/10 shrink-0">
+                  <DollarSign className="w-4 h-4 md:w-5 md:h-5 text-emerald-500" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] md:text-xs text-muted-foreground font-medium">Income</p>
+                  <p className="text-lg md:text-xl font-bold truncate">{formatCurrency(overview.income.current)}</p>
+                </div>
+              </div>
+              <div className={cn("flex items-center gap-0.5 text-[10px] md:text-xs font-semibold px-1.5 md:px-2 py-0.5 md:py-1 rounded-full shrink-0",
+                overview.income.change >= 0 ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500"
+              )}>
+                {overview.income.change >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                {Math.abs(overview.income.change).toFixed(0)}%
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ),
+    },
+    "expenses": {
+      gridClass: "col-span-6 lg:col-span-4",
+      section: 'hero',
+      render: () => (
+        <Card className="h-full hover:shadow-lg hover:shadow-rose-500/5 hover:border-rose-500/20 transition-all touch-scale">
+          <CardContent className="p-3 md:p-5">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 md:gap-3 min-w-0">
+                <div className="p-2 md:p-2.5 rounded-lg bg-rose-500/10 shrink-0">
+                  <Receipt className="w-4 h-4 md:w-5 md:h-5 text-rose-500" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] md:text-xs text-muted-foreground font-medium">Expenses</p>
+                  <p className="text-lg md:text-xl font-bold truncate">{formatCurrency(overview.expenses.current)}</p>
+                </div>
+              </div>
+              <div className={cn("flex items-center gap-0.5 text-[10px] md:text-xs font-semibold px-1.5 md:px-2 py-0.5 md:py-1 rounded-full shrink-0",
+                overview.expenses.change <= 0 ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500"
+              )}>
+                {overview.expenses.change <= 0 ? <ArrowDownRight className="w-3 h-3" /> : <ArrowUpRight className="w-3 h-3" />}
+                {Math.abs(overview.expenses.change).toFixed(0)}%
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ),
+    },
+  }), [overview, healthScore, formatCurrency]);
+
+  // Get sorted cards for a section
+  const getSortedCardsForSection = useCallback((section: 'hero' | 'secondary' | 'tertiary' | 'quaternary') => {
+    return cardOrder
+      .filter(id => cardDefinitions[id]?.section === section)
+      .map(id => ({ id, ...cardDefinitions[id] }));
+  }, [cardOrder, cardDefinitions]);
 
   return (
     <motion.div 
@@ -238,17 +526,98 @@ export default function DashboardPage() {
             </h1>
           </div>
           <div className="hidden md:flex items-center gap-3">
-            <Button variant="outline" size="sm" className="gap-2" onClick={() => router.push("/dashboard/transactions?add=true")}>
-              <Plus className="w-4 h-4" />
-              Add Transaction
-            </Button>
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-card/50 text-xs">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-muted-foreground">Live</span>
-            </div>
+            {/* Edit Mode Controls */}
+            <AnimatePresence mode="wait">
+              {isEditMode ? (
+                <motion.div 
+                  key="edit-controls"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  className="flex items-center gap-2"
+                >
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={handleCancel}
+                    className="gap-1.5 text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="w-4 h-4" />
+                    Cancel
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    onClick={handleSave}
+                    disabled={!hasUnsavedChanges || isSaving}
+                    className="gap-1.5 bg-primary hover:bg-primary/90"
+                  >
+                    <Check className="w-4 h-4" />
+                    {isSaving ? "Saving..." : "Save Layout"}
+                  </Button>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="normal-controls"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  className="flex items-center gap-3"
+                >
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setIsEditMode(true)}
+                    className="gap-2 text-muted-foreground hover:text-foreground"
+                  >
+                    <Settings2 className="w-4 h-4" />
+                    Customize
+                  </Button>
+                  <Button variant="outline" size="sm" className="gap-2" onClick={() => router.push("/dashboard/transactions?add=true")}>
+                    <Plus className="w-4 h-4" />
+                    Add Transaction
+                  </Button>
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-card/50 text-xs">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-muted-foreground">Live</span>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </motion.div>
+
+      {/* ============================================ */}
+      {/* EDIT MODE BANNER */}
+      {/* ============================================ */}
+      <AnimatePresence>
+        {isEditMode && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: "auto" }}
+            exit={{ opacity: 0, y: -20, height: 0 }}
+            className="bg-primary/10 border border-primary/20 rounded-xl p-4"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/20">
+                <GripVertical className="w-4 h-4 text-primary" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-foreground">Customize Dashboard Layout</p>
+                <p className="text-xs text-muted-foreground">Drag and drop cards to rearrange your dashboard. Changes will be saved to your account.</p>
+              </div>
+              <div className="md:hidden flex gap-2">
+                <Button variant="ghost" size="sm" onClick={handleCancel}>
+                  <X className="w-4 h-4" />
+                </Button>
+                <Button size="sm" onClick={handleSave} disabled={!hasUnsavedChanges || isSaving}>
+                  <Check className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ============================================ */}
       {/* ALERTS BAR */}
@@ -680,13 +1049,14 @@ export default function DashboardPage() {
             <CardContent className="p-4">
               {spendingByCategory.length > 0 ? (
                 <div className="space-y-4">
-                  {/* Donut Chart */}
-                  <div className="h-[160px] -mx-2">
+                  {/* Donut Chart - Compact Mode */}
+                  <div className="h-[140px]">
                     <ExpenseDonutChart 
                       data={spendingByCategory.slice(0, 6).map(cat => ({
                         name: cat.categoryName,
                         amount: cat.total,
                       }))}
+                      compact
                     />
                   </div>
                   

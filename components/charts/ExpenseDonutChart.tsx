@@ -17,6 +17,7 @@ interface ExpenseCategory {
 
 interface ExpenseDonutChartProps {
   data: ExpenseCategory[];
+  compact?: boolean;
 }
 
 const COLORS = [
@@ -79,7 +80,7 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
   );
 };
 
-export function ExpenseDonutChart({ data }: ExpenseDonutChartProps) {
+export function ExpenseDonutChart({ data, compact = false }: ExpenseDonutChartProps) {
   const total = data.reduce((sum, item) => sum + item.amount, 0);
   
   const chartData = data.map((item, index) => ({
@@ -90,8 +91,35 @@ export function ExpenseDonutChart({ data }: ExpenseDonutChartProps) {
 
   if (chartData.length === 0) {
     return (
-      <div className="w-full h-[300px] flex items-center justify-center text-zinc-500">
+      <div className={`w-full ${compact ? 'h-[140px]' : 'h-[300px]'} flex items-center justify-center text-zinc-500`}>
         No expense data available
+      </div>
+    );
+  }
+
+  // Compact mode for dashboard cards - no legend, smaller radii
+  if (compact) {
+    return (
+      <div className="w-full h-[140px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={chartData}
+              cx="50%"
+              cy="50%"
+              innerRadius={35}
+              outerRadius={60}
+              paddingAngle={2}
+              dataKey="amount"
+              labelLine={false}
+            >
+              {chartData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.fill} stroke="transparent" />
+              ))}
+            </Pie>
+            <Tooltip content={<CustomTooltip />} />
+          </PieChart>
+        </ResponsiveContainer>
       </div>
     );
   }

@@ -791,6 +791,9 @@ export const userSettings = pgTable("user_settings", {
     taxDeadlines: boolean;
   }>(),
   dashboardWidgets: jsonb("dashboard_widgets").$type<string[]>(),
+  dashboardLayout: jsonb("dashboard_layout").$type<{
+    cardOrder: string[];
+  }>(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
