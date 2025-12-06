@@ -5,6 +5,8 @@ import { ThemeProvider } from "next-themes";
 import { useState } from "react";
 import { AuthProvider } from "@/lib/auth-context";
 import { Toaster } from "sonner";
+import { StackProvider, StackTheme } from "@stackframe/stack";
+import { stackClientApp } from "@/lib/stack-client";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -20,11 +22,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-        <AuthProvider>
-          {children}
-          <Toaster
+    <StackProvider app={stackClientApp}>
+      <StackTheme>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+            <AuthProvider>
+              {children}
+              <Toaster
             position="bottom-right"
             duration={7000}
             richColors
@@ -41,8 +45,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
               },
             }}
           />
-        </AuthProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+            </AuthProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
+      </StackTheme>
+    </StackProvider>
   );
 }
