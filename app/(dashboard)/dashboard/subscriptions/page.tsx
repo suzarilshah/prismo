@@ -490,7 +490,7 @@ export default function SubscriptionsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="font-display font-semibold text-3xl tracking-tight">Subscriptions</h1>
+          <h1 className="font-display font-semibold text-2xl md:text-3xl tracking-tight">Subscriptions</h1>
           <p className="text-muted-foreground text-sm mt-1">
             Manage your recurring subscriptions and payments
           </p>

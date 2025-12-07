@@ -290,9 +290,9 @@ export default function GoalsPage() {
 
   return (
     <div className="space-y-6 animate-fade-in-up">
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
         <div>
-          <h1 className="font-display font-semibold text-3xl tracking-tight">Financial Goals</h1>
+          <h1 className="font-display font-semibold text-2xl md:text-3xl tracking-tight">Financial Goals</h1>
           <p className="text-muted-foreground text-sm mt-1">Track your progress towards your dreams</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
@@ -364,18 +364,18 @@ export default function GoalsPage() {
       </div>
 
       {/* Overall Progress Card */}
-      <Card className="data-card p-6 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
+      <Card className="data-card p-4 md:p-6 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              <h3 className="text-xs md:text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                 Overall Progress
               </h3>
-              <p className="text-3xl font-display font-bold mt-2">{overallProgress.toFixed(1)}%</p>
+              <p className="text-2xl md:text-3xl font-display font-bold mt-2">{overallProgress.toFixed(1)}%</p>
             </div>
-            <div className="text-right">
+            <div className="sm:text-right">
               <p className="text-sm text-muted-foreground">Total Saved</p>
-              <p className="text-2xl font-display font-semibold text-primary mt-1">
+              <p className="text-xl md:text-2xl font-display font-semibold text-primary mt-1">
                 {formatCurrency(totalCurrentAmount.toString())}
               </p>
               <p className="text-xs text-muted-foreground mt-1">

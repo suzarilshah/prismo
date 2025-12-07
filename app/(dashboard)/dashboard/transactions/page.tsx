@@ -404,7 +404,7 @@ export default function TransactionsPage() {
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h1 className="font-display font-semibold text-3xl tracking-tight">Transactions</h1>
+          <h1 className="font-display font-semibold text-2xl md:text-3xl tracking-tight">Transactions</h1>
           <p className="text-muted-foreground text-sm mt-1">Track and categorize your financial activity</p>
         </div>
         
@@ -810,24 +810,24 @@ export default function TransactionsPage() {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="data-card p-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+        <Card className="data-card p-4 md:p-6">
           <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Total Income</div>
-          <div className="font-display font-semibold text-3xl tracking-tight text-emerald-500">
+          <div className="font-display font-semibold text-xl md:text-3xl tracking-tight text-emerald-500">
             {formatCurrency(totalIncome)}
           </div>
         </Card>
         
-        <Card className="data-card p-6">
+        <Card className="data-card p-4 md:p-6">
           <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Total Expenses</div>
-          <div className="font-display font-semibold text-3xl tracking-tight text-red-500">
+          <div className="font-display font-semibold text-xl md:text-3xl tracking-tight text-red-500">
             {formatCurrency(totalExpenses)}
           </div>
         </Card>
         
-        <Card className="data-card p-6">
+        <Card className="data-card p-4 md:p-6">
           <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Net Cash Flow</div>
-          <div className="font-display font-semibold text-3xl tracking-tight">
+          <div className="font-display font-semibold text-xl md:text-3xl tracking-tight">
             {formatCurrency(totalIncome - totalExpenses)}
           </div>
         </Card>
@@ -872,10 +872,10 @@ export default function TransactionsPage() {
           {groupedTransactions.map((group) => (
             <Card key={group.key} className="data-card overflow-hidden">
               {/* Month Header */}
-              <div className="px-6 py-4 border-b border-border bg-muted/30">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-display font-semibold text-lg">{group.label}</h3>
-                  <div className="flex items-center gap-4 text-sm">
+              <div className="px-4 md:px-6 py-3 md:py-4 border-b border-border bg-muted/30">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <h3 className="font-display font-semibold text-base md:text-lg">{group.label}</h3>
+                  <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs md:text-sm">
                     <span className="text-emerald-500 font-medium">
                       +{formatCurrency(group.monthTotal.income)}
                     </span>
@@ -902,9 +902,9 @@ export default function TransactionsPage() {
                   {group.transactions.map((tx: Transaction) => (
                     <div
                       key={tx.id}
-                      className="flex items-center justify-between px-6 py-4 hover:bg-muted/20 transition-colors group"
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-4 md:px-6 py-3 md:py-4 hover:bg-muted/20 transition-colors group gap-2 sm:gap-0"
                     >
-                      <div className="flex items-center gap-4 flex-1 min-w-0">
+                      <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                           tx.type === "income" ? "bg-emerald-500/10" : "bg-red-500/10"
                         }`}>
@@ -943,23 +943,23 @@ export default function TransactionsPage() {
                         </div>
                       </div>
                       
-                      <div className="flex items-center gap-2">
-                        {/* Payment Method Badge */}
+                      <div className="flex items-center gap-2 justify-between sm:justify-end w-full sm:w-auto">
+                        {/* Payment Method Badge - Hidden on mobile */}
                         {tx.paymentMethod && (
-                          <Badge variant="outline" className="text-xs font-normal opacity-60 group-hover:opacity-100 transition-opacity">
+                          <Badge variant="outline" className="text-xs font-normal opacity-60 group-hover:opacity-100 transition-opacity hidden md:flex">
                             <CreditCard className="w-3 h-3 mr-1" />
                             {getPaymentMethodLabel(tx.paymentMethod)}
                             {tx.creditCard?.lastFourDigits && ` •••• ${tx.creditCard.lastFourDigits}`}
                           </Badge>
                         )}
                         
-                        <div className={`font-display font-semibold text-lg ${
+                        <div className={`font-display font-semibold text-base md:text-lg ${
                           tx.type === "income" ? "text-emerald-500" : "text-foreground"
                         }`}>
                           {tx.type === "income" ? "+" : "-"}{formatCurrency(tx.amount)}
                         </div>
                         
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                           <Button
                             variant="ghost"
                             size="icon"

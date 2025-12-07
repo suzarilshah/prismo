@@ -536,7 +536,7 @@ export default function TaxPage() {
   return (
     <div className="space-y-8">
       {/* Premium Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600/20 via-purple-600/10 to-pink-600/10 border border-violet-500/20 p-8">
+      <div className="relative overflow-hidden rounded-2xl md:rounded-3xl bg-gradient-to-br from-violet-600/20 via-purple-600/10 to-pink-600/10 border border-violet-500/20 p-4 md:p-8">
         <div className="absolute inset-0 bg-grid-white/5 [mask-image:linear-gradient(0deg,transparent,black)]" />
         <div className="absolute top-0 right-0 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl" />
         
@@ -550,7 +550,7 @@ export default function TaxPage() {
                 LHDN YA {selectedYear}
               </Badge>
             </div>
-            <h1 className="font-display font-bold text-4xl tracking-tight mb-2">
+            <h1 className="font-display font-bold text-2xl md:text-4xl tracking-tight mb-2">
               Tax Management
             </h1>
             <p className="text-muted-foreground max-w-md">

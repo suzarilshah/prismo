@@ -251,9 +251,9 @@ export default function BudgetsPage() {
 
   return (
     <div className="space-y-6 animate-fade-in-up">
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
         <div>
-          <h1 className="font-display font-semibold text-3xl tracking-tight">Budgets</h1>
+          <h1 className="font-display font-semibold text-2xl md:text-3xl tracking-tight">Budgets</h1>
           <p className="text-muted-foreground text-sm mt-1">
             {new Date().toLocaleDateString("en-MY", { month: "long", year: "numeric" })} Budget Overview
           </p>
@@ -331,20 +331,20 @@ export default function BudgetsPage() {
       </div>
 
       {/* Overall Summary */}
-      <Card className="data-card p-6 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
+      <Card className="data-card p-4 md:p-6 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              <h3 className="text-xs md:text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                 Overall Budget Status
               </h3>
-              <p className="text-3xl font-display font-bold mt-2">
+              <p className="text-2xl md:text-3xl font-display font-bold mt-2">
                 {overallPercentage.toFixed(1)}% Used
               </p>
             </div>
-            <div className="text-right">
+            <div className="sm:text-right">
               <p className="text-sm text-muted-foreground">Total Spent</p>
-              <p className="text-2xl font-display font-semibold text-primary mt-1">
+              <p className="text-xl md:text-2xl font-display font-semibold text-primary mt-1">
                 {formatCurrency(totalSpent)}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
