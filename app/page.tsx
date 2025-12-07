@@ -313,9 +313,9 @@ export default function LandingPage() {
       
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-primary/30 dark">
       {/* Ambient Background */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[600px] bg-gradient-to-b from-blue-600/20 via-purple-600/10 to-transparent blur-[120px] opacity-60" />
-        <div className="absolute bottom-0 left-0 w-[800px] h-[400px] bg-gradient-to-tr from-emerald-600/10 to-transparent blur-[100px]" />
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[200vw] md:w-[1200px] h-[600px] bg-gradient-to-b from-blue-600/20 via-purple-600/10 to-transparent blur-[120px] opacity-60" />
+        <div className="absolute bottom-0 left-0 w-[150vw] md:w-[800px] h-[400px] bg-gradient-to-tr from-emerald-600/10 to-transparent blur-[100px]" />
       </div>
 
       {/* Grid Pattern */}

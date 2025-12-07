@@ -108,7 +108,7 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex">
+    <div className="min-h-screen bg-background text-foreground flex overflow-x-hidden w-full">
       {/* Left side - Branding */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-card">
         {/* Grid pattern */}
