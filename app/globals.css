@@ -486,4 +486,58 @@
   .skeleton-mobile {
     @apply animate-pulse bg-muted rounded-lg;
   }
+
+  /* Horizontal scroll container for mobile */
+  .scroll-x-mobile {
+    @apply overflow-x-auto pb-2;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .scroll-x-mobile::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Mobile card adjustments */
+  @media (max-width: 640px) {
+    .mobile-card-compact {
+      @apply p-3;
+    }
+    
+    .mobile-text-sm {
+      font-size: 0.8125rem;
+      line-height: 1.25rem;
+    }
+    
+    /* Reduce visual noise on mobile */
+    .mobile-minimal-border {
+      border-width: 0.5px;
+    }
+  }
+
+  /* Ensure minimum touch target size */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Mobile-optimized button */
+  .btn-mobile {
+    @apply h-11 px-4 font-medium text-sm rounded-xl touch-scale;
+  }
+
+  /* Card that adapts to mobile */
+  .card-responsive {
+    @apply rounded-xl md:rounded-2xl p-4 md:p-6;
+  }
+
+  /* Container with mobile padding */
+  .container-mobile {
+    @apply px-4 md:px-6 lg:px-8;
+  }
+
+  /* Grid gap responsive */
+  .gap-responsive {
+    @apply gap-3 md:gap-4 lg:gap-6;
+  }
 }

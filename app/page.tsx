@@ -213,16 +213,21 @@ export default function LandingPage() {
               <Link href="#about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">About</Link>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 md:gap-3">
               <Link href="/dashboard">
-                <Button variant="ghost" className="text-muted-foreground hover:text-foreground hover:bg-muted/50">
+                <Button variant="ghost" className="h-11 px-4 text-muted-foreground hover:text-foreground hover:bg-muted/50">
                   Sign In
                 </Button>
               </Link>
-              <Link href="/dashboard">
-                <Button className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold rounded-xl px-5">
+              <Link href="/dashboard" className="hidden sm:block">
+                <Button className="h-11 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold rounded-xl px-5">
                   Get Started
                   <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              </Link>
+              <Link href="/dashboard" className="sm:hidden">
+                <Button size="icon" className="h-11 w-11 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl">
+                  <ArrowRight className="w-5 h-5" />
                 </Button>
               </Link>
             </div>
@@ -557,6 +562,128 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Product Demo Video Section */}
+      <section className="relative py-32 border-t border-white/5 overflow-hidden">
+        {/* Background Glow */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[600px] bg-gradient-to-r from-blue-600/20 via-cyan-600/10 to-purple-600/20 blur-[120px] rounded-full" />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-sm mb-6">
+              <Play className="w-4 h-4 text-cyan-400" />
+              <span className="text-cyan-400 font-medium">Product Demo</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+              See Prismo in
+              <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent"> action</span>
+            </h2>
+            <p className="text-lg md:text-xl text-white/50 max-w-2xl mx-auto">
+              Watch how Prismo transforms the way you manage your finances. 
+              From expense tracking to tax optimization — all in under 3 minutes.
+            </p>
+          </motion.div>
+
+          {/* Video Container */}
+          <motion.div
+            initial={{ opacity: 0, y: 40, scale: 0.95 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="relative max-w-5xl mx-auto"
+          >
+            {/* Animated gradient border */}
+            <div className="absolute -inset-[2px] bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 rounded-3xl opacity-50 blur-sm" />
+            
+            <div className="relative">
+              {/* Glow Effect */}
+              <div className="absolute inset-0 bg-gradient-to-t from-cyan-500/10 to-blue-500/10 blur-3xl opacity-50" />
+              
+              {/* Video Frame */}
+              <div className="relative rounded-3xl border border-white/10 bg-[#0a0a0a] overflow-hidden shadow-2xl shadow-cyan-500/10">
+                {/* Browser Chrome */}
+                <div className="h-11 bg-[#1a1a1a] border-b border-white/5 flex items-center px-4 gap-3">
+                  <div className="flex gap-2">
+                    <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
+                    <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
+                    <div className="w-3 h-3 rounded-full bg-[#28c840]" />
+                  </div>
+                  <div className="flex-1 flex justify-center">
+                    <div className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-white/5 text-xs text-white/40">
+                      <Play className="w-3 h-3 text-cyan-400" />
+                      Product Demo
+                    </div>
+                  </div>
+                  <div className="w-16" />
+                </div>
+                
+                {/* Video Player */}
+                <div className="relative w-full aspect-video bg-black">
+                  <video
+                    className="w-full h-full object-cover"
+                    controls
+                    playsInline
+                    preload="metadata"
+                    poster="/screenshots/dashboard-preview.png"
+                  >
+                    <source 
+                      src="https://syd.cloud.appwrite.io/v1/storage/buckets/prismo-bucket/files/product_demo/view?project=prismo&mode=admin" 
+                      type="video/mp4" 
+                    />
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+              </div>
+            </div>
+
+            {/* Floating Feature Pills */}
+            <motion.div
+              animate={{ y: [0, -8, 0] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -top-6 -left-6 md:-left-12 hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500/20 to-emerald-500/10 border border-emerald-500/20 shadow-lg backdrop-blur-sm"
+            >
+              <Check className="w-4 h-4 text-emerald-400" />
+              <span className="text-sm font-medium text-emerald-400">Smart Categorization</span>
+            </motion.div>
+
+            <motion.div
+              animate={{ y: [0, 8, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+              className="absolute -bottom-6 -right-6 md:-right-12 hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-violet-500/20 to-violet-500/10 border border-violet-500/20 shadow-lg backdrop-blur-sm"
+            >
+              <Calculator className="w-4 h-4 text-violet-400" />
+              <span className="text-sm font-medium text-violet-400">LHDN Tax Ready</span>
+            </motion.div>
+          </motion.div>
+
+          {/* Video Features */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+            className="flex flex-wrap justify-center gap-6 md:gap-12 mt-12 md:mt-16"
+          >
+            {[
+              { icon: BarChart3, text: "Real-time Analytics" },
+              { icon: Shield, text: "Bank-grade Security" },
+              { icon: Sparkles, text: "AI-Powered Insights" },
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-2 text-white/50">
+                <item.icon className="w-5 h-5 text-cyan-400" />
+                <span className="text-sm font-medium">{item.text}</span>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
       {/* Testimonials */}
       <section className="relative py-32 border-t border-white/5">
         <div className="max-w-7xl mx-auto px-6">
@@ -671,10 +798,10 @@ export default function LandingPage() {
             ].map((col, i) => (
               <div key={i}>
                 <h4 className="font-semibold mb-4 text-white/80">{col.title}</h4>
-                <ul className="space-y-3">
+                <ul className="space-y-1">
                   {col.links.map((link, j) => (
                     <li key={j}>
-                      <Link href="#" className="text-sm text-white/40 hover:text-white transition-colors">{link}</Link>
+                      <Link href="#" className="block py-2 text-sm text-white/40 hover:text-white transition-colors min-h-[44px] flex items-center">{link}</Link>
                     </li>
                   ))}
                 </ul>
