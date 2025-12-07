@@ -401,7 +401,7 @@ export default function TransactionsPage() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in-up">
+    <div className="space-y-6 animate-fade-in-up w-full max-w-[100vw] overflow-x-hidden">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <h1 className="font-display font-semibold text-2xl md:text-3xl tracking-tight">Transactions</h1>

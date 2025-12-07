@@ -144,7 +144,7 @@ export default function IncomeSummaryPage() {
   if (isLoading) return <div className="flex items-center justify-center min-h-[60vh]"><LoadingSpinner size="lg" text="Loading income data..." /></div>;
 
   return (
-    <div className="space-y-8 animate-fade-in-up">
+    <div className="space-y-8 animate-fade-in-up w-full max-w-[100vw] overflow-x-hidden">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div><h1 className="font-display font-semibold text-3xl md:text-4xl tracking-tight">Income Summary</h1><p className="text-muted-foreground text-sm mt-1">Track and manage your income sources</p></div>

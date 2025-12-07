@@ -513,7 +513,7 @@ export default function CommitmentsPage() {
           </p>
         </div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           {/* View Toggle */}
           <div className="flex items-center gap-1 p-1 bg-muted rounded-lg">
             <Button
@@ -811,11 +811,11 @@ export default function CommitmentsPage() {
       {/* Monthly Checklist */}
       <Card className="data-card">
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-semibold">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <CardTitle className="text-lg font-semibold truncate">
               {new Date().toLocaleDateString("en-MY", { month: "long", year: "numeric" })} Payment Checklist
             </CardTitle>
-            <Badge variant="outline">
+            <Badge variant="outline" className="w-fit">
               {paidThisMonth.length} / {commitments.length} Paid
             </Badge>
           </div>
@@ -1170,32 +1170,32 @@ function CommitmentCard({
           : "border-border hover:border-primary/30"
       }`}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3 min-w-0">
           <Checkbox
             checked={isPaid}
             onCheckedChange={(checked: boolean | "indeterminate") => onTogglePaid(!!checked)}
             disabled={isPending}
-            className="w-5 h-5"
+            className="w-5 h-5 shrink-0"
           />
-          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+          <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
             isPaid ? "bg-emerald-500/10" : "bg-muted"
           }`}>
             <TypeIcon className={`w-5 h-5 ${isPaid ? "text-emerald-500" : typeInfo.color}`} />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <p className={`font-medium ${isPaid ? "line-through text-muted-foreground" : ""}`}>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className={`font-medium truncate ${isPaid ? "line-through text-muted-foreground" : ""}`}>
                 {commitment.name}
               </p>
               {commitment.isPriority && (
-                <Badge variant="outline" className="text-xs">Priority</Badge>
+                <Badge variant="outline" className="text-xs shrink-0">Priority</Badge>
               )}
             </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span>{commitment.payee || typeInfo.label}</span>
-              <span>•</span>
-              <span>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground truncate flex-wrap">
+              <span className="truncate">{commitment.payee || typeInfo.label}</span>
+              <span className="shrink-0">•</span>
+              <span className="shrink-0">
                 Due {new Date(commitment.nextDueDate).toLocaleDateString("en-MY", {
                   day: "numeric",
                   month: "short",

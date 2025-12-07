@@ -305,7 +305,7 @@ export default function DashboardPage() {
 
   return (
     <motion.div 
-      className="space-y-4 md:space-y-6 pb-safe w-full max-w-full overflow-x-hidden"
+      className="space-y-4 md:space-y-6 pb-safe w-full max-w-[100vw] overflow-x-hidden"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -494,9 +494,9 @@ export default function DashboardPage() {
               </div>
               <div className="mt-6 space-y-3">
                 {healthScore.factors.map((factor, idx) => (
-                  <div key={idx} className="flex items-center justify-between">
-                    <span className="text-sm text-zinc-400">{factor.name}</span>
-                    <div className="flex items-center gap-2">
+                  <div key={idx} className="flex items-center justify-between gap-2">
+                    <span className="text-sm text-zinc-400 truncate">{factor.name}</span>
+                    <div className="flex items-center gap-2 shrink-0">
                       <div className={cn("w-2 h-2 rounded-full",
                         factor.status === 'good' && "bg-emerald-500",
                         factor.status === 'warning' && "bg-amber-500",

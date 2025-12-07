@@ -856,7 +856,7 @@ export default function TaxPage() {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Chargeable Income</p>
-                <p className="font-display font-bold text-2xl md:text-3xl mt-2">
+                <p className="font-display font-bold text-2xl md:text-3xl mt-2 truncate">
                   {formatCurrency(chargeableIncome)}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">After reliefs</p>
@@ -1125,11 +1125,11 @@ export default function TaxPage() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.03 }}
-                      className="flex items-center justify-between p-4 rounded-2xl border border-border bg-card/50 hover:border-blue-500/30 hover:bg-blue-500/5 transition-all group"
+                      className="flex items-center justify-between p-4 rounded-2xl border border-border bg-card/50 hover:border-blue-500/30 hover:bg-blue-500/5 transition-all group flex-col sm:flex-row gap-4 sm:gap-0"
                     >
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-4 w-full sm:w-auto">
                         <div className={cn(
-                          "w-12 h-12 rounded-xl flex items-center justify-center",
+                          "w-12 h-12 rounded-xl flex items-center justify-center shrink-0",
                           d.verified ? "bg-emerald-500/10" : "bg-blue-500/10"
                         )}>
                           {d.receiptUrl ? (
@@ -1140,9 +1140,9 @@ export default function TaxPage() {
                             <Receipt className="w-5 h-5 text-blue-400" />
                           )}
                         </div>
-                        <div>
-                          <p className="font-semibold">{d.description}</p>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold truncate max-w-[180px] sm:max-w-none">{d.description}</p>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1 flex-wrap">
                             <Badge variant="outline" className="text-xs py-0 h-5">
                               {d.lhdnCategory || d.category}
                             </Badge>
@@ -1164,7 +1164,7 @@ export default function TaxPage() {
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
                         <p className="font-display font-bold text-xl text-blue-400">
                           {formatCurrency(parseFloat(d.amount))}
                         </p>
