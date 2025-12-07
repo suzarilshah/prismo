@@ -1,17 +1,1 @@
-<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- PRISMO ICON - Adaptive Theme Version -->
-  <defs>
-    <linearGradient id="iconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#8B5CF6"/>
-      <stop offset="100%" style="stop-color:#A78BFA"/>
-    </linearGradient>
-  </defs>
-
-  <!-- Prismatic Diamond Icon Only - No Background -->
-  <g id="prism-icon">
-    <path d="M 32 8 L 52 32 L 32 56 L 12 32 Z" fill="url(#iconGrad)"/>
-    <path d="M 12 32 L 32 8 L 32 56 Z" fill="#6D28D9" opacity="0.5"/>
-    <path d="M 22 20 L 32 8 L 42 20 Z" fill="currentColor" opacity="0.15"/>
-    <line x1="32" y1="12" x2="32" y2="52" stroke="currentColor" stroke-width="2" opacity="0.2" stroke-linecap="round"/>
-  </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="none" viewBox="0 0 64 64"><defs><linearGradient id="iconGrad" x1="0%" x2="100%" y1="0%" y2="100%"><stop offset="0%" style="stop-color:#8b5cf6"/><stop offset="100%" style="stop-color:#a78bfa"/></linearGradient></defs><g id="prism-icon"><path fill="url(#iconGrad)" d="M 32 8 L 52 32 L 32 56 L 12 32 Z"/><path fill="#6D28D9" d="M 12 32 L 32 8 L 32 56 Z" opacity=".5"/><path fill="currentColor" d="M 22 20 L 32 8 L 42 20 Z" opacity=".15"/><line x1="32" x2="32" y1="12" y2="52" stroke="currentColor" stroke-linecap="round" stroke-width="2" opacity=".2"/></g></svg>
