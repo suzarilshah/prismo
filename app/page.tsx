@@ -748,29 +748,21 @@ export default function LandingPage() {
                   <div className="w-16" />
                 </div>
                 
-                {/* Video Player / Demo Preview */}
+                {/* Video Player */}
                 <div className="relative w-full aspect-video bg-black">
-                  {/* Dashboard Preview Image as Fallback */}
-                  <Image
-                    src="/og-image.png"
-                    alt="Prismo Dashboard Demo"
-                    fill
-                    className="object-cover"
-                    priority
-                  />
-                  {/* Play Button Overlay */}
-                  <Link 
-                    href="/dashboard"
-                    className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/80 via-black/40 to-transparent hover:from-black/70 hover:via-black/30 transition-all group cursor-pointer"
+                  <video
+                    className="w-full h-full object-cover"
+                    controls
+                    playsInline
+                    preload="metadata"
+                    poster="/og-image.png"
+                    autoPlay
+                    muted
+                    loop
                   >
-                    <div className="text-center">
-                      <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mb-4 group-hover:bg-white/30 group-hover:scale-110 transition-all shadow-2xl">
-                        <Play className="w-8 h-8 md:w-10 md:h-10 text-white ml-1" />
-                      </div>
-                      <p className="text-white text-lg md:text-xl font-semibold">Try the Live Demo</p>
-                      <p className="text-white/60 text-sm mt-1">Experience Prismo yourself</p>
-                    </div>
-                  </Link>
+                    <source src="/videos/product-demo.mp4" type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
                 </div>
               </div>
             </div>
