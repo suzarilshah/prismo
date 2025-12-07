@@ -748,33 +748,29 @@ export default function LandingPage() {
                   <div className="w-16" />
                 </div>
                 
-                {/* Video Player */}
+                {/* Video Player / Demo Preview */}
                 <div className="relative w-full aspect-video bg-black">
-                  <video
-                    className="w-full h-full object-cover"
-                    controls
-                    playsInline
-                    preload="auto"
-                    poster="/og-image.png"
-                    crossOrigin="anonymous"
+                  {/* Dashboard Preview Image as Fallback */}
+                  <Image
+                    src="/og-image.png"
+                    alt="Prismo Dashboard Demo"
+                    fill
+                    className="object-cover"
+                    priority
+                  />
+                  {/* Play Button Overlay */}
+                  <Link 
+                    href="/dashboard"
+                    className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/80 via-black/40 to-transparent hover:from-black/70 hover:via-black/30 transition-all group cursor-pointer"
                   >
-                    <source 
-                      src="https://syd.cloud.appwrite.io/v1/storage/buckets/prismo-bucket/files/product_demo/view?project=prismo" 
-                      type="video/mp4" 
-                    />
-                    <source 
-                      src="https://syd.cloud.appwrite.io/v1/storage/buckets/prismo-bucket/files/product_demo/download?project=prismo" 
-                      type="video/mp4" 
-                    />
-                    Your browser does not support the video tag.
-                  </video>
-                  {/* Fallback overlay if video fails */}
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 transition-opacity pointer-events-none">
                     <div className="text-center">
-                      <Play className="w-16 h-16 text-white mx-auto mb-2" />
-                      <p className="text-white text-sm">Click to play demo</p>
+                      <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mb-4 group-hover:bg-white/30 group-hover:scale-110 transition-all shadow-2xl">
+                        <Play className="w-8 h-8 md:w-10 md:h-10 text-white ml-1" />
+                      </div>
+                      <p className="text-white text-lg md:text-xl font-semibold">Try the Live Demo</p>
+                      <p className="text-white/60 text-sm mt-1">Experience Prismo yourself</p>
                     </div>
-                  </div>
+                  </Link>
                 </div>
               </div>
             </div>
