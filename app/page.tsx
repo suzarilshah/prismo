@@ -3,6 +3,7 @@
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import Image from "next/image";
+import Script from "next/script";
 import { Button } from "@/components/ui/button";
 import { 
   ArrowRight, 
@@ -30,6 +31,122 @@ import { motion, useInView } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
 import { Star, Lock } from "lucide-react";
 import { Logo } from "@/components/logo";
+
+// Structured Data for SEO (JSON-LD)
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "@id": "https://prismo.airail.uk/#webapp",
+      "name": "Prismo Finance",
+      "description": "Smart money management for Malaysians. Track expenses, optimize taxes with LHDN integration, manage subscriptions, and achieve financial goals.",
+      "url": "https://prismo.airail.uk",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Web Browser",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "MYR",
+        "description": "Free trial available"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "ratingCount": "1247",
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "featureList": [
+        "Expense Tracking",
+        "Budget Management", 
+        "Tax Optimization (LHDN)",
+        "Subscription Tracking",
+        "AI Financial Assistant",
+        "Goal Setting",
+        "Credit Card Management",
+        "Financial Forecasting"
+      ]
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://prismo.airail.uk/#organization",
+      "name": "Prismo Finance Sdn Bhd",
+      "url": "https://prismo.airail.uk",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://prismo.airail.uk/logos/prismo-logo-dark.svg"
+      },
+      "sameAs": [
+        "https://twitter.com/prismofinance",
+        "https://linkedin.com/company/prismofinance"
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer support",
+        "availableLanguage": ["English", "Malay"]
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://prismo.airail.uk/#website",
+      "url": "https://prismo.airail.uk",
+      "name": "Prismo Finance",
+      "description": "The intelligent finance platform for modern Malaysians",
+      "publisher": {
+        "@id": "https://prismo.airail.uk/#organization"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://prismo.airail.uk/dashboard/transactions?search={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "Prismo Finance",
+      "applicationCategory": "FinanceApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "MYR"
+      },
+      "screenshot": "https://prismo.airail.uk/og-image.png"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is Prismo Finance?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Prismo Finance is an intelligent personal finance platform designed for Malaysians. It helps you track expenses, optimize taxes with LHDN integration, manage subscriptions, and achieve your financial goals with AI-powered insights."
+          }
+        },
+        {
+          "@type": "Question", 
+          "name": "Is Prismo Finance free to use?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, Prismo Finance offers a free trial with full access to all features. You can start managing your finances immediately without any credit card required."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Prismo help with Malaysian taxes?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! Prismo integrates with LHDN tax categories and automatically tracks eligible tax reliefs. It helps Malaysian users maximize their tax deductions and provides PCB calculations."
+          }
+        }
+      ]
+    }
+  ]
+};
 
 // Animated counter component
 function AnimatedCounter({ target, suffix = "", prefix = "" }: { target: number; suffix?: string; prefix?: string }) {
@@ -186,6 +303,14 @@ export default function LandingPage() {
   }, [setTheme]);
 
   return (
+    <>
+      {/* Structured Data for SEO */}
+      <Script
+        id="structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-primary/30 dark">
       {/* Ambient Background */}
       <div className="fixed inset-0 pointer-events-none">
@@ -629,15 +754,27 @@ export default function LandingPage() {
                     className="w-full h-full object-cover"
                     controls
                     playsInline
-                    preload="metadata"
-                    poster="/screenshots/dashboard-preview.png"
+                    preload="auto"
+                    poster="/og-image.png"
+                    crossOrigin="anonymous"
                   >
                     <source 
-                      src="https://syd.cloud.appwrite.io/v1/storage/buckets/prismo-bucket/files/product_demo/view?project=prismo&mode=admin" 
+                      src="https://syd.cloud.appwrite.io/v1/storage/buckets/prismo-bucket/files/product_demo/view?project=prismo" 
+                      type="video/mp4" 
+                    />
+                    <source 
+                      src="https://syd.cloud.appwrite.io/v1/storage/buckets/prismo-bucket/files/product_demo/download?project=prismo" 
                       type="video/mp4" 
                     />
                     Your browser does not support the video tag.
                   </video>
+                  {/* Fallback overlay if video fails */}
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 transition-opacity pointer-events-none">
+                    <div className="text-center">
+                      <Play className="w-16 h-16 text-white mx-auto mb-2" />
+                      <p className="text-white text-sm">Click to play demo</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -820,5 +957,6 @@ export default function LandingPage() {
         </div>
       </footer>
     </div>
+    </>
   );
 }

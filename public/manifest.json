@@ -1,0 +1,38 @@
+{
+  "name": "Prismo Finance",
+  "short_name": "Prismo",
+  "description": "Smart money management for Malaysians. Track expenses, optimize taxes, achieve financial goals.",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#8B5CF6",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en-MY",
+  "categories": ["finance", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/logos/prismo-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Prismo Finance Dashboard"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

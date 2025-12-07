@@ -229,7 +229,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex relative">
+    <div className="min-h-screen bg-background text-foreground flex relative overflow-x-hidden max-w-[100vw]">
       {/* Grid Background Pattern */}
       <div className="fixed inset-0 pointer-events-none grid-pattern" />
       
@@ -466,8 +466,10 @@ export default function DashboardLayout({
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-4 md:p-6 lg:p-8 z-10 overflow-x-hidden pb-mobile-nav">
-          {children}
+        <main className="flex-1 p-4 md:p-6 lg:p-8 z-10 overflow-x-hidden pb-mobile-nav w-full max-w-full">
+          <div className="w-full max-w-full overflow-x-hidden">
+            {children}
+          </div>
         </main>
       </div>
 

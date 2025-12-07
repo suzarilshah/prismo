@@ -305,7 +305,7 @@ export default function DashboardPage() {
 
   return (
     <motion.div 
-      className="space-y-4 md:space-y-6 pb-safe"
+      className="space-y-4 md:space-y-6 pb-safe w-full max-w-full overflow-x-hidden"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -467,15 +467,29 @@ export default function DashboardPage() {
                   </span>
                 </div>
                 <div className="mt-4 md:mt-6 flex justify-center">
-                  <CircularProgress 
-                    value={healthScore.score} 
-                    max={100} 
-                    size={160}
-                    strokeWidth={12}
-                    color={healthScore.score >= 75 ? "#10b981" : healthScore.score >= 50 ? "#f59e0b" : "#ef4444"}
-                    showValue
-                    animate
-                  />
+                  {/* Responsive CircularProgress - smaller on mobile */}
+                  <div className="block md:hidden">
+                    <CircularProgress 
+                      value={healthScore.score} 
+                      max={100} 
+                      size={120}
+                      strokeWidth={10}
+                      color={healthScore.score >= 75 ? "#10b981" : healthScore.score >= 50 ? "#f59e0b" : "#ef4444"}
+                      showValue
+                      animate
+                    />
+                  </div>
+                  <div className="hidden md:block">
+                    <CircularProgress 
+                      value={healthScore.score} 
+                      max={100} 
+                      size={160}
+                      strokeWidth={12}
+                      color={healthScore.score >= 75 ? "#10b981" : healthScore.score >= 50 ? "#f59e0b" : "#ef4444"}
+                      showValue
+                      animate
+                    />
+                  </div>
                 </div>
               </div>
               <div className="mt-6 space-y-3">

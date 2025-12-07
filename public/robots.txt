@@ -1,0 +1,32 @@
+# Prismo Finance - robots.txt
+# https://prismo.airail.uk
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://prismo.airail.uk/sitemap.xml
+
+# Crawl delay for considerate crawling
+Crawl-delay: 1
+
+# Block sensitive paths
+Disallow: /api/
+Disallow: /_next/
+Disallow: /dashboard/settings
+Disallow: /*.json$
+
+# Allow important paths
+Allow: /manifest.json
+Allow: /og-image.png
+Allow: /logos/
+
+# Googlebot specific
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+# Bingbot specific
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
