@@ -747,8 +747,8 @@ export default function CommitmentsPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <Card className="data-card p-6">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
+        <Card className="data-card p-4 md:p-6">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <Wallet className="w-5 h-5 text-primary" />
@@ -758,7 +758,7 @@ export default function CommitmentsPage() {
           <div className="font-display font-bold text-2xl">{formatCurrency(summary.totalMonthly)}</div>
         </Card>
         
-        <Card className="data-card p-6 border-emerald-500/20">
+        <Card className="data-card p-4 md:p-6 border-emerald-500/20">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
               <TrendingUp className="w-5 h-5 text-emerald-500" />
@@ -779,7 +779,7 @@ export default function CommitmentsPage() {
           <div className="font-display font-bold text-2xl">{summary.active}</div>
         </Card>
         
-        <Card className={`data-card p-6 ${summary.overdue > 0 ? "border-red-500/30" : ""}`}>
+        <Card className={`data-card p-4 md:p-6 ${summary.overdue > 0 ? "border-red-500/30" : ""}`}>
           <div className="flex items-center gap-3 mb-3">
             <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
               summary.overdue > 0 ? "bg-red-500/10" : "bg-muted"
@@ -793,7 +793,7 @@ export default function CommitmentsPage() {
           </div>
         </Card>
         
-        <Card className={`data-card p-6 ${summary.dueSoon > 0 ? "border-amber-500/30" : ""}`}>
+        <Card className={`data-card p-4 md:p-6 ${summary.dueSoon > 0 ? "border-amber-500/30" : ""}`}>
           <div className="flex items-center gap-3 mb-3">
             <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
               summary.dueSoon > 0 ? "bg-amber-500/10" : "bg-muted"

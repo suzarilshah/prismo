@@ -735,7 +735,7 @@ export default function TaxPage() {
         transition={{ delay: 0.1 }}
       >
         <Card className={cn(
-          "relative overflow-hidden border-2 p-6",
+          "relative overflow-hidden border-2 p-4 md:p-6",
           refundOrOwed.status === "refund" 
             ? "border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent" 
             : refundOrOwed.status === "owed"
@@ -765,7 +765,7 @@ export default function TaxPage() {
                     {refundOrOwed.status === "refund" ? "Estimated Refund" : refundOrOwed.status === "owed" ? "Estimated Tax Due" : "Tax Status"}
                   </p>
                   <p className={cn(
-                    "font-display font-bold text-3xl",
+                    "font-display font-bold text-2xl md:text-3xl",
                     refundOrOwed.status === "refund" ? "text-emerald-500" : refundOrOwed.status === "owed" ? "text-amber-500" : "text-blue-500"
                   )}>
                     {refundOrOwed.status === "balanced" ? "Balanced" : formatCurrency(refundOrOwed.status === "refund" ? refundOrOwed.refund : refundOrOwed.owed)}
@@ -800,7 +800,7 @@ export default function TaxPage() {
       {/* Summary Metric Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-          <Card className="p-6 bg-gradient-to-br from-violet-500/10 to-purple-500/5 border-violet-500/20 hover:border-violet-500/40 transition-colors">
+          <Card className="p-4 md:p-6 bg-gradient-to-br from-violet-500/10 to-purple-500/5 border-violet-500/20 hover:border-violet-500/40 transition-colors">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Total Deductions</p>
@@ -817,7 +817,7 @@ export default function TaxPage() {
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-          <Card className="p-6 bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border-emerald-500/20 hover:border-emerald-500/40 transition-colors">
+          <Card className="p-4 md:p-6 bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border-emerald-500/20 hover:border-emerald-500/40 transition-colors">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Tax Savings</p>
@@ -834,7 +834,7 @@ export default function TaxPage() {
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-          <Card className="p-6 bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border-blue-500/20 hover:border-blue-500/40 transition-colors">
+          <Card className="p-4 md:p-6 bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border-blue-500/20 hover:border-blue-500/40 transition-colors">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Categories Used</p>

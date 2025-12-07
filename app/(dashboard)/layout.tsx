@@ -404,7 +404,7 @@ export default function DashboardLayout({
       {/* Main Content */}
       <div className="flex-1 md:ml-64 flex flex-col min-h-screen relative">
         {/* Topbar */}
-        <header className="h-16 border-b border-border bg-background/80 backdrop-blur-xl sticky top-0 z-20 px-6 flex items-center justify-between">
+        <header className="h-16 border-b border-border bg-background/80 backdrop-blur-xl sticky top-0 z-20 px-4 md:px-6 flex items-center justify-between w-full max-w-[100vw] overflow-hidden">
           <div className="flex items-center gap-4 md:hidden">
             <Button variant="ghost" size="icon" className="text-muted-foreground">
               <Menu className="w-6 h-6" />

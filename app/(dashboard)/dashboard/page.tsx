@@ -632,7 +632,7 @@ export default function DashboardPage() {
                         {bill.icon || (bill.type === 'subscription' ? '📱' : '📄')}
                       </div>
                       <div>
-                        <p className="text-sm font-medium">{bill.name}</p>
+                        <p className="text-sm font-medium truncate max-w-[140px] md:max-w-none">{bill.name}</p>
                         <p className="text-xs text-muted-foreground capitalize">{bill.frequency}</p>
                       </div>
                     </div>

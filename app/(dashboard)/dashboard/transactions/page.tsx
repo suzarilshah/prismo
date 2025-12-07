@@ -833,9 +833,9 @@ export default function TransactionsPage() {
         </Card>
       </div>
 
-      <Card className="data-card p-4">
+      <Card className="data-card p-4 overflow-hidden">
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="relative flex-1">
+          <div className="relative flex-1 min-w-0">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search transactions..."
@@ -845,14 +845,14 @@ export default function TransactionsPage() {
             />
           </div>
           
-          <div className="flex gap-2">
-            <Button variant={filterType === "all" ? "default" : "outline"} onClick={() => setFilterType("all")} size="sm">
+          <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
+            <Button variant={filterType === "all" ? "default" : "outline"} onClick={() => setFilterType("all")} size="sm" className="shrink-0">
               All
             </Button>
-            <Button variant={filterType === "income" ? "default" : "outline"} onClick={() => setFilterType("income")} size="sm">
+            <Button variant={filterType === "income" ? "default" : "outline"} onClick={() => setFilterType("income")} size="sm" className="shrink-0">
               Income
             </Button>
-            <Button variant={filterType === "expense" ? "default" : "outline"} onClick={() => setFilterType("expense")} size="sm">
+            <Button variant={filterType === "expense" ? "default" : "outline"} onClick={() => setFilterType("expense")} size="sm" className="shrink-0">
               Expenses
             </Button>
           </div>

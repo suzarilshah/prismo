@@ -219,9 +219,9 @@ export default function IncomeSummaryPage() {
           <Card className="data-card"><CardHeader><CardTitle className="text-lg font-semibold">Monthly Income</CardTitle></CardHeader><CardContent><MonthlySalaryChart data={incomeSummary.monthlyBreakdown} avgMonthlySalary={incomeSummary.summary.avgMonthlySalary} /></CardContent></Card>
 
           {/* Editable Monthly Table */}
-          <Card className="data-card"><CardHeader><CardTitle className="text-lg font-semibold flex items-center gap-2">Monthly Details <span className="text-xs font-normal text-muted-foreground">(Click cells to edit)</span></CardTitle></CardHeader><CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+          <Card className="data-card w-full max-w-[100vw] overflow-hidden"><CardHeader><CardTitle className="text-lg font-semibold flex items-center gap-2">Monthly Details <span className="text-xs font-normal text-muted-foreground">(Click cells to edit)</span></CardTitle></CardHeader><CardContent className="p-0 md:p-6">
+            <div className="overflow-x-auto w-full">
+              <table className="w-full text-sm min-w-[800px]">
                 <thead><tr className="border-b border-border">
                   <th className="text-left py-3 px-4 font-semibold text-muted-foreground">Month</th>
                   {INCOME_TYPES.slice(0, 5).map(t => <th key={t.key} className={`text-right py-3 px-4 font-semibold ${t.color}`}>{t.label}</th>)}

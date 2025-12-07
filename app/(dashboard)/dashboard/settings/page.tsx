@@ -131,27 +131,29 @@ export default function SettingsPage() {
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="bg-muted/50 p-1">
-          <TabsTrigger value="general" className="data-[state=active]:bg-background">
-            <User className="w-4 h-4 mr-2" />
-            General
-          </TabsTrigger>
-          <TabsTrigger value="notifications" className="data-[state=active]:bg-background">
-            <Bell className="w-4 h-4 mr-2" />
-            Notifications
-          </TabsTrigger>
-          <TabsTrigger value="security" className="data-[state=active]:bg-background">
-            <Shield className="w-4 h-4 mr-2" />
-            Security
-          </TabsTrigger>
-          <TabsTrigger value="ai" className="data-[state=active]:bg-background relative">
-            <Brain className="w-4 h-4 mr-2" />
-            AI Assistant
-            <Badge variant="secondary" className="ml-2 text-[10px] px-1.5 py-0">
-              BETA
-            </Badge>
-          </TabsTrigger>
-        </TabsList>
+        <div className="w-full overflow-x-auto pb-2 no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
+          <TabsList className="bg-muted/50 p-1 w-full md:w-auto inline-flex h-auto">
+            <TabsTrigger value="general" className="data-[state=active]:bg-background flex-1 md:flex-none">
+              <User className="w-4 h-4 mr-2" />
+              General
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="data-[state=active]:bg-background flex-1 md:flex-none">
+              <Bell className="w-4 h-4 mr-2" />
+              Notifications
+            </TabsTrigger>
+            <TabsTrigger value="security" className="data-[state=active]:bg-background flex-1 md:flex-none">
+              <Shield className="w-4 h-4 mr-2" />
+              Security
+            </TabsTrigger>
+            <TabsTrigger value="ai" className="data-[state=active]:bg-background relative flex-1 md:flex-none">
+              <Brain className="w-4 h-4 mr-2" />
+              AI
+              <Badge variant="secondary" className="ml-2 text-[10px] px-1.5 py-0 hidden sm:inline-flex">
+                BETA
+              </Badge>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* General Settings Tab */}
         <TabsContent value="general" className="space-y-6">
